@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "../public/css/virtanis.css";
+
+:root {
+  --font-space-grotesk: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-dm-serif: 'DM Serif Display', Georgia, serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--ivory, #fdfbf7);
+  color: var(--text, #1c2420);
+  font-family: var(--font-space-grotesk);
+}
