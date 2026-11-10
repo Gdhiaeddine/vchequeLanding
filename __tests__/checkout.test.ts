@@ -2,6 +2,8 @@ import { describe, it, expect, afterAll } from 'vitest';
 import prisma from '../lib/prisma';
 import { NextRequest } from 'next/server';
 import { POST as submitCheckout } from '../app/api/checkout/submit/route';
+import slickPayService from '../lib/payments/slickpay';
+import mailerService from '../lib/mail/mailer';
 
 describe('Checkout & Order Flow', () => {
   let createdRef: string;
@@ -65,5 +67,15 @@ describe('Checkout & Order Flow', () => {
     expect(saved?.amount).toBe(18900);
 
     await prisma.order.delete({ where: { reference: enterpriseRef } });
+  });
+
+  it('verifies getInvoice returns completed: false for mock or invalid invoice ID', async () => {
+    const status = await slickPayService.getInvoice('MOCK-INV-1234');
+    expect(status.completed).toBe(false);
+  });
+
+  it('ensures mailer service is configured and handles email delivery interface', () => {
+    expect(mailerService).toBeDefined();
+    expect(typeof mailerService.sendLicenseConfirmationEmail).toBe('function');
   });
 });

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { LicenseManager } from '@/lib/licensing/license-manager';
+import slickPayService from '@/lib/payments/slickpay';
+import mailerService from '@/lib/mail/mailer';
 import {
   Check,
   CheckCircle2,
@@ -79,16 +81,39 @@ export default async function CheckoutSuccessPage({
 
   let licenseKey = order.license_key;
 
-  // 3. Si la licence n'est pas encore attribuée, création atomique sécurisée
-  if (!licenseKey) {
+  // 3. Si la commande n'a pas encore été validée, vérification stricte du paiement
+  if (order.status !== 'completed' || !licenseKey) {
+    let isPaymentConfirmed = false;
+
+    // Simulation autorisée uniquement en environnement mock/test local
+    if (simulated === 'true' && slickPayService.isMockMode()) {
+      isPaymentConfirmed = true;
+    } else if (order.slickpay_invoice_id) {
+      // Interrogation directe de l'API SlickPay pour vérifier la validation réelle du paiement
+      const invoiceCheck = await slickPayService.getInvoice(order.slickpay_invoice_id);
+      if (invoiceCheck.completed) {
+        isPaymentConfirmed = true;
+      }
+    }
+
+    // Si le paiement n'est pas certifié par la banque ou SlickPay, interdire l'accès et rediriger vers annulation
+    if (!isPaymentConfirmed) {
+      redirect(`/commander/annulation?ref=${encodeURIComponent(order.reference)}&reason=unpaid`);
+    }
+
+    // 4. Génération atomique de la licence une fois le paiement authentifié
     licenseKey = LicenseManager.generateKey();
     let maxActivations = 1;
+    let planTitle = 'Licence VCheque Permanente';
+
     if (order.metadata) {
       try {
         const meta = JSON.parse(order.metadata);
         if (meta.maxActivations && typeof meta.maxActivations === 'number') {
           maxActivations = meta.maxActivations;
         }
+        if (meta.plan === 'duo') planTitle = 'Licence VCheque Duo (2 Postes)';
+        if (meta.plan === 'enterprise') planTitle = 'Licence VCheque Entreprise (5 Postes)';
       } catch {}
     }
 
@@ -104,11 +129,11 @@ export default async function CheckoutSuccessPage({
           max_activations: maxActivations,
           status: 'active',
           current_machine_id: null,
-          notes: `Généré automatiquement pour la commande ${order.reference}`,
+          notes: `Généré automatiquement suite au règlement SlickPay de la commande ${order.reference}`,
         },
       });
 
-      // 2. Mise à jour du statut de la commande
+      // 2. Mise à jour du statut de la commande à 'completed'
       await tx.order.update({
         where: { id: order.id },
         data: {
@@ -127,10 +152,23 @@ export default async function CheckoutSuccessPage({
           details: JSON.stringify({
             order_reference: order.reference,
             amount: order.amount,
-            simulated: simulated === 'true',
+            simulated: simulated === 'true' && slickPayService.isMockMode(),
+            slickpay_invoice_id: order.slickpay_invoice_id,
           }),
         },
       });
+    });
+
+    // 5. Expédition automatique de l'email de confirmation avec la clé de licence
+    await mailerService.sendLicenseConfirmationEmail({
+      to: order.email,
+      customerName: order.nom,
+      orderRef: order.reference,
+      licenseKey: licenseKey!,
+      amount: order.amount,
+      company: order.entreprise,
+      planTitle,
+      maxActivations,
     });
   }
 
