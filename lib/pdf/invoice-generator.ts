@@ -28,6 +28,20 @@ function removeSlashBetweenNumbers(value: string | null | undefined): string {
 }
 
 /**
+ * Formate un montant en Dinars Algériens (DZD) avec des espaces ASCII standard (0x20)
+ * pour séparer les milliers et une virgule décimale.
+ * Garantit l'absence totale du caractère Unicode U+202F (Narrow No-Break Space)
+ * qui était converti en slash (" /") par l'encodage WinAnsi de PDFKit.
+ */
+function formatCurrencyDZD(amount: number): string {
+  const num = Math.round(Number(amount || 0) * 100) / 100;
+  const parts = num.toFixed(2).split('.');
+  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const decPart = parts[1];
+  return `${intPart},${decPart}`;
+}
+
+/**
  * Génère le document officiel de facture acquittée A4 au format PDF
  * en style monochrome noir & blanc minimaliste, haute fidélité financière,
  * exactement sur 1 page unique, avec la typographie officielle de la marque VCheque.
@@ -94,11 +108,8 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       const yearStr = paymentDate.getFullYear();
       const dateStr = `${dayStr} ${monthStr} ${yearStr}`;
 
-      // Montant formaté (ex: 25 000,00 DZD)
-      const formattedAmount = new Intl.NumberFormat('fr-DZ', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(params.amount);
+      // Montant formaté en Dinars Algériens (ex: 25 000,00 DZD) sans caractère unicode masqué
+      const formattedAmount = formatCurrencyDZD(params.amount);
 
       const cleanOrderRef = removeSlashBetweenNumbers(params.orderRef);
       const cleanTransactionId = removeSlashBetweenNumbers(params.transactionId || params.orderRef);
@@ -120,13 +131,13 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica')
         .fontSize(8.5)
         .fillColor(COLOR_MUTED)
-        .text("Solution d'Impression & Gestion de Chèques Bancaires — Édité par Virtanis", marginX, headerY + 28);
+        .text("Solution d'Impression & Gestion de Chèques Bancaires — Édité par Virtanis", marginX, headerY + 30);
 
       doc
         .font('Helvetica')
         .fontSize(7.5)
         .fillColor(COLOR_FAINT)
-        .text('www.virtanis.net • support@virtanis.dz', marginX, headerY + 41);
+        .text('www.virtanis.net • support@virtanis.dz', marginX, headerY + 44);
 
       // Bloc de droite : Facture, Référence, Date & Statut
       // Titre Facture Acquittée
@@ -143,7 +154,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica-Bold')
         .fontSize(9.5)
         .fillColor(COLOR_BLACK)
-        .text(`N° Commande : ${cleanOrderRef}`, marginX, headerY + 23, {
+        .text(`N° Commande : ${cleanOrderRef}`, marginX, headerY + 24, {
           align: 'right',
           width: contentWidth,
         });
@@ -152,7 +163,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica')
         .fontSize(8.5)
         .fillColor(COLOR_MUTED)
-        .text(`Date d'émission : ${dateStr}`, marginX, headerY + 36, {
+        .text(`Date d'émission : ${dateStr}`, marginX, headerY + 38, {
           align: 'right',
           width: contentWidth,
         });
@@ -162,13 +173,13 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica')
         .fontSize(8)
         .fillColor(COLOR_BODY)
-        .text('Règlement reçu en ligne (SlickPay — CIB, Edahabia)', marginX, headerY + 48, {
+        .text('Règlement reçu en ligne (SlickPay — CIB, Edahabia)', marginX, headerY + 52, {
           align: 'right',
           width: contentWidth,
         });
 
-      // Ligne séparatrice supérieure fine
-      const lineY1 = headerY + 68;
+      // Espace augmenté sous VCheque et Facture Acquittée (aération demandée)
+      const lineY1 = headerY + 82;
       doc
         .moveTo(marginX, lineY1)
         .lineTo(rightX, lineY1)
@@ -179,10 +190,10 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       // ==========================================
       // 2. CARTOUCHES PARTENAIRES (ÉDITEUR & CLIENT)
       // ==========================================
-      const partyY = lineY1 + 12;
+      const partyY = lineY1 + 16;
       const colWidth = (contentWidth - 16) / 2;
       const clientX = marginX + colWidth + 16;
-      const boxHeight = 76;
+      const boxHeight = 74;
 
       // Cartouche Éditeur (Gauche)
       doc

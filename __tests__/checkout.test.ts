@@ -126,5 +126,20 @@ describe('Checkout & Order Flow', () => {
     expect(pages).toBe(1);
     const raw = pdf.toString('utf-8');
     expect(raw).not.toMatch(/\d+\/\d+/);
+
+    // Decompress PDF stream to verify raw text does not contain " /" in amounts
+    const zlib = await import('zlib');
+    let streamIdx = pdf.indexOf('stream\n');
+    while (streamIdx !== -1) {
+      const endStream = pdf.indexOf('endstream', streamIdx);
+      const chunk = pdf.subarray(streamIdx + 7, endStream);
+      try {
+        const text = zlib.inflateSync(chunk).toString('latin1');
+        expect(text).not.toContain(' /');
+        expect(text).not.toContain('18 /900');
+        expect(text).not.toContain('/900');
+      } catch {}
+      streamIdx = pdf.indexOf('stream\n', endStream + 9);
+    }
   });
 });
