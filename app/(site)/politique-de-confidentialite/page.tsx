@@ -16,6 +16,7 @@ import {
   FileText,
   ExternalLink,
   CheckCircle2,
+  ShoppingBag,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -548,21 +549,21 @@ export default function PolitiqueConfidentialitePage() {
                   nos mentions légales :
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-6">
-                  <a
-                    href="mailto:contact@virtanis.net?subject=Demande%20DPO%20-%20VCheque"
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-[#102C25] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#16382E] transition-all shadow-sm"
+                <div className="legal-action-group">
+                  <Link
+                    href="/commander"
+                    className="legal-btn-primary"
                   >
-                    <Mail size={16} aria-hidden="true" />
-                    <span>Contacter le Délégué aux Données (DPO)</span>
-                  </a>
+                    <ShoppingBag size={16} aria-hidden="true" />
+                    <span>Commander une licence VCheque</span>
+                  </Link>
 
                   <Link
-                    href="/mentions-legales"
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-white text-[#102C25] border border-[#B99A5A] text-xs font-bold uppercase tracking-wider hover:bg-[#F7F4EC] transition-all"
+                    href="/contact"
+                    className="legal-btn-secondary"
                   >
-                    <FileText size={16} className="text-[#B99A5A]" aria-hidden="true" />
-                    <span>Consulter les Mentions Légales</span>
+                    <Mail size={16} aria-hidden="true" />
+                    <span>Contacter</span>
                   </Link>
                 </div>
               </div>

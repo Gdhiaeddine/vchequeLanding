@@ -522,21 +522,21 @@ export default function MentionsLegalesPage() {
                   ou pour solliciter une facture proforma certifiée, nos conseillers et juristes restent à votre entière disposition :
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-6">
-                  <a
-                    href="mailto:contact@virtanis.net"
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-[#102C25] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#16382E] transition-all shadow-sm"
-                  >
-                    <Mail size={16} aria-hidden="true" />
-                    <span>Écrire à contact@virtanis.net</span>
-                  </a>
-
+                <div className="legal-action-group">
                   <Link
                     href="/commander"
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-white text-[#102C25] border border-[#B99A5A] text-xs font-bold uppercase tracking-wider hover:bg-[#F7F4EC] transition-all"
+                    className="legal-btn-primary"
                   >
-                    <ShoppingBag size={16} className="text-[#B99A5A]" aria-hidden="true" />
+                    <ShoppingBag size={16} aria-hidden="true" />
                     <span>Commander une licence VCheque</span>
+                  </Link>
+
+                  <Link
+                    href="/contact"
+                    className="legal-btn-secondary"
+                  >
+                    <Mail size={16} aria-hidden="true" />
+                    <span>Contacter</span>
                   </Link>
                 </div>
               </div>

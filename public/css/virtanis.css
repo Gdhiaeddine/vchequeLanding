@@ -1,11 +1,11 @@
 /* ==========================================================================
-   VCHEQUE — Site vitrine
-   Design system : Vert forêt profond, Or champagne, Ivoire chaud
-   Aucune dépendance externe (CSS natif, desksktop-first).
+   VCHEQUE â Site vitrine
+   Design system : Vert forÃªt profond, Or champagne, Ivoire chaud
+   Aucune dÃ©pendance externe (CSS natif, desksktop-first).
    ========================================================================== */
 
 /* ==========================================================================
-   0. Polices auto-hébergées (VisualBlock Fonts) — latin, swap
+   0. Polices auto-hÃ©bergÃ©es (VisualBlock Fonts) â latin, swap
    ========================================================================== */
 @font-face {
   font-family: "Space Grotesk";
@@ -34,7 +34,7 @@
 :root {
   /* Marque */
   --green-900: #102C25;   /* vert sombre */
-  --green-800: #193D32;   /* vert forêt  */
+  --green-800: #193D32;   /* vert forÃªt  */
   --green-700: #24503F;
   --gold-500:  #B99A5A;   /* or champagne */
   --gold-700:  #96763D;   /* or survol   */
@@ -51,7 +51,7 @@
   --border:      #E6E0D3;
   --border-soft: #EDE7DA;
 
-  /* Or : B99A5A pour les traits/bords décoratifs, teinte encre pour le texte */
+  /* Or : B99A5A pour les traits/bords dÃ©coratifs, teinte encre pour le texte */
   --gold-text:   #7A5F2E;
 
   /* Typographie */
@@ -114,7 +114,7 @@ p:last-child { margin-bottom: 0; }
 
 ::selection { background: rgba(185, 154, 90, 0.28); }
 
-/* Focus visible accessible — or/gold, toujours net */
+/* Focus visible accessible â or/gold, toujours net */
 :focus-visible {
   outline: 2px solid var(--gold-700);
   outline-offset: 3px;
@@ -125,7 +125,7 @@ p:last-child { margin-bottom: 0; }
   outline-offset: 2px;
 }
 
-/* Lien d'évitement */
+/* Lien d'Ã©vitement */
 .skip-link {
   position: absolute;
   left: 50%;
@@ -236,7 +236,7 @@ p:last-child { margin-bottom: 0; }
   gap: 0.5rem;
   line-height: 1;
 }
-/* « Virtanis » : le même serif que le titre du hero */
+/* Â« Virtanis Â» : le mÃªme serif que le titre du hero */
 .brand-agency {
   font-family: var(--font-serif);
   font-weight: 400;
@@ -251,7 +251,7 @@ p:last-child { margin-bottom: 0; }
   background: var(--border);
   transform: translateY(1px);
 }
-/* « VCheque » */
+/* Â« VCheque Â» */
 .brand-product {
   font-family: var(--font-serif);
   font-size: 0.9rem;
@@ -299,7 +299,7 @@ p:last-child { margin-bottom: 0; }
 .nav-link[aria-current="page"] { color: var(--green-800); }
 .nav-link[aria-current="page"]::after { right: 0; }
 
-/* --- Actions à droite ---------------------------------------------------- */
+/* --- Actions Ã  droite ---------------------------------------------------- */
 .header-actions {
   display: flex;
   align-items: center;
@@ -329,7 +329,7 @@ p:last-child { margin-bottom: 0; }
 .nav-toggle[aria-expanded="true"] .icon-close { display: block; }
 
 /* --- panneau navigation mobile ------------------------------------------- */
-/* Par défaut (sans JS) : masqué — la media-query mobile le déroule dans
+/* Par dÃ©faut (sans JS) : masquÃ© â la media-query mobile le dÃ©roule dans
    le flux pour que les liens restent accessibles sans JavaScript. */
 .mobile-nav {
   display: none;
@@ -366,9 +366,9 @@ p:last-child { margin-bottom: 0; }
 .mobile-actions .btn { width: 100%; padding: 0.85rem 1rem; }
 
 /*
- * Avec JavaScript : le panneau devient un menu superposé sous l'en-tête,
- * contrôlé par le bouton bascule. Sans JS, la media-query ci-dessous le
- * laisse déroulé dans le flux (tous les liens restent accessibles).
+ * Avec JavaScript : le panneau devient un menu superposÃ© sous l'en-tÃªte,
+ * contrÃ´lÃ© par le bouton bascule. Sans JS, la media-query ci-dessous le
+ * laisse dÃ©roulÃ© dans le flux (tous les liens restent accessibles).
  */
 html.js .mobile-nav {
   position: absolute;
@@ -386,13 +386,13 @@ html.js .mobile-nav.is-open { display: block; }
 .hero {
   position: relative;
   overflow: hidden;
-  /* Remplit le premier écran sous l'en-tête sans excès */
+  /* Remplit le premier Ã©cran sous l'en-tÃªte sans excÃ¨s */
   min-height: max(600px, min(calc(100svh - var(--header-h)), 780px));
   display: flex;
   align-items: center;
 }
 
-/* Fond ivoire + traitement décoratif discret */
+/* Fond ivoire + traitement dÃ©coratif discret */
 .hero::before {
   content: "";
   position: absolute;
@@ -409,7 +409,7 @@ html.js .mobile-nav.is-open { display: block; }
   pointer-events: none;
 }
 
-/* liséré doré architectural en haut */
+/* lisÃ©rÃ© dorÃ© architectural en haut */
 .hero-rule {
   height: 3px;
   background: linear-gradient(to right,
@@ -518,13 +518,13 @@ html.js .mobile-nav.is-open { display: block; }
 .badge-dot svg { width: 16px; height: 16px; }
 
 /* --------------------------------------------------------------------------
-   6. Visuel produit : fenêtre d'application (maquette HTML/CSS)
+   6. Visuel produit : fenÃªtre d'application (maquette HTML/CSS)
    -------------------------------------------------------------------------- */
 .hero-visual {
   position: relative;
   min-width: 0;
 }
-/* halo doré discret derrière la fenêtre */
+/* halo dorÃ© discret derriÃ¨re la fenÃªtre */
 .hero-visual::before {
   content: "";
   position: absolute;
@@ -533,7 +533,7 @@ html.js .mobile-nav.is-open { display: block; }
   background: radial-gradient(58% 52% at 62% 40%,
               rgba(185, 154, 90, 0.2), rgba(185, 154, 90, 0) 70%);
 }
-/* règle graduée "millimètres" verticale décorative */
+/* rÃ¨gle graduÃ©e "millimÃ¨tres" verticale dÃ©corative */
 .mm-scale {
   position: absolute;
   left: -1.6rem;
@@ -640,7 +640,7 @@ html.js .mobile-nav.is-open { display: block; }
 
 .win-body { display: flex; min-width: 0; }
 
-/* --- barre latérale vert sombre ------------------------------------------- */
+/* --- barre latÃ©rale vert sombre ------------------------------------------- */
 .nc-sidebar {
   display: flex;
   flex-direction: column;
@@ -798,7 +798,7 @@ html.js .mobile-nav.is-open { display: block; }
 }
 .nc-printbtn svg { width: 12px; height: 12px; color: var(--gold-500); }
 
-/* --- volet aperçu + calibrage ---------------------------------------------- */
+/* --- volet aperÃ§u + calibrage ---------------------------------------------- */
 .nc-side {
   flex: 1 1 40%;
   min-width: 0;
@@ -833,7 +833,7 @@ html.js .mobile-nav.is-open { display: block; }
   white-space: nowrap;
 }
 
-/* chèque générique (aucune marque bancaire) */
+/* chÃ¨que gÃ©nÃ©rique (aucune marque bancaire) */
 .cheque-paper {
   position: relative;
   aspect-ratio: 180 / 80;
@@ -1017,7 +1017,7 @@ html.js .mobile-nav.is-open { display: block; }
 }
 
 /* --------------------------------------------------------------------------
-   8. Pages d'attente (routes non encore implémentées)
+   8. Pages d'attente (routes non encore implÃ©mentÃ©es)
    -------------------------------------------------------------------------- */
 .soon {
   min-height: 52vh;
@@ -1056,7 +1056,7 @@ html.js .mobile-nav.is-open { display: block; }
 .soon-actions { display: flex; justify-content: center; gap: 0.8rem; margin-top: 1.6rem; flex-wrap: wrap; }
 
 /* --------------------------------------------------------------------------
-   9. Animation d'entrée (désactivée si prefers-reduced-motion)
+   9. Animation d'entrÃ©e (dÃ©sactivÃ©e si prefers-reduced-motion)
    -------------------------------------------------------------------------- */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(16px); }
@@ -1117,7 +1117,7 @@ html.js .mobile-nav.is-open { display: block; }
   .mm-scale { display: none; }
   .hero-visual::before { inset: -6% -4% 4% 6%; }
 
-  /* app window : colonne latérale masquée, volets empilés */
+  /* app window : colonne latÃ©rale masquÃ©e, volets empilÃ©s */
   .win-body { flex-direction: column; }
   .nc-sidebar { display: none; }
   .nc-side { border-left: 0; border-top: 1px solid var(--border-soft); }
@@ -1132,7 +1132,7 @@ html.js .mobile-nav.is-open { display: block; }
   .trust-grid { grid-template-columns: 1fr; gap: 1.1rem; }
 }
 
-/* Écrans durs : rien ne déborde */
+/* Ãcrans durs : rien ne dÃ©borde */
 @media (max-width: 359px) {
   .brand-sep { display: none; }
 }
@@ -1169,7 +1169,7 @@ html.js .mobile-nav.is-open { display: block; }
   padding-block: clamp(3.75rem, 7vw, 6rem);
   border-top: 1px solid var(--border-soft);
 }
-/* la bande-trust suit immédiatement le hero : pas de bordure supérieure */
+/* la bande-trust suit immÃ©diatement le hero : pas de bordure supÃ©rieure */
 .trust-strip { border-top: 0; }
 
 .section--alt  { background: var(--panel); }
@@ -1212,7 +1212,7 @@ html.js .mobile-nav.is-open { display: block; }
 }
 
 /* ==========================================================================
-   13. CARTES (bénéfices, compatibilité)
+   13. CARTES (bÃ©nÃ©fices, compatibilitÃ©)
    ========================================================================== */
 .cards-grid {
   display: grid;
@@ -1264,7 +1264,7 @@ html.js .mobile-nav.is-open { display: block; }
 .card-body strong { color: var(--text); }
 
 /* ==========================================================================
-   14. FONCTIONNALITÉS (6 blocs alternés + panneaux démo)
+   14. FONCTIONNALITÃS (6 blocs alternÃ©s + panneaux dÃ©mo)
    ========================================================================== */
 .features-list { max-width: 1180px; }
 
@@ -1307,7 +1307,7 @@ html.js .mobile-nav.is-open { display: block; }
   .feature-row--flip .fx-panel { order: 1; }
 }
 
-/* panneaux de démonstration */
+/* panneaux de dÃ©monstration */
 .fx-panel {
   background: var(--white);
   border: 1px solid var(--border);
@@ -1407,7 +1407,7 @@ html.js .mobile-nav.is-open { display: block; }
 .fx-calib b { color: var(--green-800); font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
-   15. ÉTAPES (mode d'emploi + parcours d'achat)
+   15. ÃTAPES (mode d'emploi + parcours d'achat)
    ========================================================================== */
 .steps {
   list-style: none;
@@ -1456,7 +1456,7 @@ html.js .mobile-nav.is-open { display: block; }
 }
 
 /* ==========================================================================
-   16. COMPATIBILITÉ
+   16. COMPATIBILITÃ
    ========================================================================== */
 .compat-note {
   margin-top: 1.9rem;
@@ -1473,7 +1473,7 @@ html.js .mobile-nav.is-open { display: block; }
 .compat-note strong { color: var(--green-900); }
 .compat-note .inline-link { display: inline-block; margin-left: 0.35rem; }
 
-/* Marquee Interbancaire Algérien */
+/* Marquee Interbancaire AlgÃ©rien */
 .marquee-wrapper {
   position: relative;
   width: 100%;
@@ -1603,7 +1603,7 @@ html.js .mobile-nav.is-open { display: block; }
   box-shadow: 0 6px 20px -4px rgba(16, 44, 37, 0.08), 0 32px 72px -28px rgba(16, 44, 37, 0.25);
 }
 
-/* En-tête de la carte */
+/* En-tÃªte de la carte */
 .pricing-card-header {
   margin-bottom: 1.75rem;
 }
@@ -1772,7 +1772,7 @@ html.js .mobile-nav.is-open { display: block; }
   color: var(--text-muted);
 }
 
-/* Grille Fonctionnalités & Conditions */
+/* Grille FonctionnalitÃ©s & Conditions */
 .pricing-details-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -1946,7 +1946,7 @@ html.js .mobile-nav.is-open { display: block; }
   line-height: 1.5;
 }
 
-/* Bandeau de réassurance et clarté sous la carte */
+/* Bandeau de rÃ©assurance et clartÃ© sous la carte */
 .pricing-trust-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2318,7 +2318,7 @@ html.js .faq-panel.is-open {
   overflow: hidden;
 }
 .checkout-hero::after {
-  /* Motif guilloché fiduciaire discret en filigrane CSS */
+  /* Motif guillochÃ© fiduciaire discret en filigrane CSS */
   content: "";
   position: absolute;
   inset: 0;
@@ -2389,7 +2389,7 @@ html.js .faq-panel.is-open {
 }
 .checkout-step + .checkout-step { position: relative; padding-left: 0.9rem; }
 .checkout-step + .checkout-step::before {
-  /* Ligne discrète reliant les étapes */
+  /* Ligne discrÃ¨te reliant les Ã©tapes */
   content: "";
   width: 0.9rem;
   height: 1px;
@@ -2594,7 +2594,7 @@ input[type="checkbox"]:focus-visible {
   font-weight: 500;
 }
 
-/* --- Champ piégé anti-robot (visuel neutralisé) ----------------------------- */
+/* --- Champ piÃ©gÃ© anti-robot (visuel neutralisÃ©) ----------------------------- */
 .hp-field {
   position: absolute !important;
   left: -9999px;
@@ -2645,7 +2645,7 @@ input[type="checkbox"]:focus-visible {
 }
 .checkout-back a:hover { color: var(--green-800); text-decoration: underline; }
 
-/* --- Récapitulatif ------------------------------------------------------------ */
+/* --- RÃ©capitulatif ------------------------------------------------------------ */
 .checkout-summary { padding: clamp(1.3rem, 2.4vw, 1.9rem); }
 
 .checkout-summary .checkout-h2 {
@@ -2725,7 +2725,7 @@ input[type="checkbox"]:focus-visible {
   color: var(--text-faint);
 }
 
-/* --- Panneau paiement sécurisé -------------------------------------------------- */
+/* --- Panneau paiement sÃ©curisÃ© -------------------------------------------------- */
 .summary-secure {
   display: flex;
   align-items: flex-start;
@@ -2824,8 +2824,8 @@ input[type="checkbox"]:focus-visible {
 
 @media (max-width: 640px) {
   .checkout-form { padding: 1.25rem 1rem 1.5rem; }
-  /* Étapes empilées (numéro au-dessus du libellé), connecteurs retirés
-     pour garantir les très petites largeurs (320 px) */
+  /* Ãtapes empilÃ©es (numÃ©ro au-dessus du libellÃ©), connecteurs retirÃ©s
+     pour garantir les trÃ¨s petites largeurs (320 px) */
   .checkout-steps { justify-content: center; gap: 0.5rem; }
   .checkout-step { flex-direction: column; align-items: center; text-align: center; flex: 1 1 0; min-width: 0; }
   .checkout-step + .checkout-step { padding-left: 0; }
@@ -3144,7 +3144,7 @@ input[type="checkbox"]:focus-visible {
 }
 
 /* ==========================================================================
-   24. TABLEAU DE BORD EXÉCUTIF & CONSOLE D'ADMINISTRATION
+   24. TABLEAU DE BORD EXÃCUTIF & CONSOLE D'ADMINISTRATION
    ========================================================================== */
 .admin-layout {
   display: flex;
@@ -3369,7 +3369,7 @@ input[type="checkbox"]:focus-visible {
   flex: 1;
 }
 
-/* --- En-tête de contenu du dashboard -------------------------------------- */
+/* --- En-tÃªte de contenu du dashboard -------------------------------------- */
 .dash-head {
   display: flex;
   align-items: flex-start;
@@ -3564,7 +3564,7 @@ input[type="checkbox"]:focus-visible {
   font-weight: 700;
 }
 
-/* --- Grille 2 Colonnes de Données Récentes -------------------------------- */
+/* --- Grille 2 Colonnes de DonnÃ©es RÃ©centes -------------------------------- */
 .data-grid-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
@@ -4218,7 +4218,7 @@ input[type="checkbox"]:focus-visible {
   color: #96783C;
 }
 
-/* --- État "Aucun résultat" ---------------------------------------------- */
+/* --- Ãtat "Aucun rÃ©sultat" ---------------------------------------------- */
 .blog-empty-card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -4304,7 +4304,7 @@ input[type="checkbox"]:focus-visible {
   cursor: not-allowed;
 }
 
-/* --- Bannière de Conversion Logiciel ------------------------------------ */
+/* --- BanniÃ¨re de Conversion Logiciel ------------------------------------ */
 .blog-cta-banner {
   background: linear-gradient(145deg, #102C25 0%, #081814 100%);
   border: 1px solid rgba(185, 154, 90, 0.35);
@@ -4502,7 +4502,7 @@ input[type="checkbox"]:focus-visible {
 
 
 /* ==========================================================================
-   27. Article de Blog & Détail (Luxury Banking)
+   27. Article de Blog & DÃ©tail (Luxury Banking)
    ========================================================================== */
 .article-detail-page {
   background: var(--ivory);
@@ -5051,7 +5051,7 @@ input[type="checkbox"]:focus-visible {
   border-color: #102C25;
 }
 
-/* Encart d'autorité Virtanis */
+/* Encart d'autoritÃ© Virtanis */
 .article-author-card {
   background: #FFFFFF;
   border-radius: 14px;
@@ -5096,7 +5096,7 @@ input[type="checkbox"]:focus-visible {
   margin: 0;
 }
 
-/* Section Articles Recommandés */
+/* Section Articles RecommandÃ©s */
 .related-posts-section {
   max-width: var(--container);
   margin: 4.5rem auto 0;
@@ -5174,7 +5174,7 @@ input[type="checkbox"]:focus-visible {
 
 
 /* ==========================================================================
-   VCHEQUE CONTACT PAGE — LUXURY BANKING STYLING
+   VCHEQUE CONTACT PAGE â LUXURY BANKING STYLING
    ========================================================================== */
 
 .contact-hero {
@@ -5717,7 +5717,7 @@ a.contact-direct-value:hover {
 
 
 /* ==========================================================================
-   VCHEQUE DEMONSTRATION PAGE — LUXURY BANKING STYLING
+   VCHEQUE DEMONSTRATION PAGE â LUXURY BANKING STYLING
    ========================================================================== */
 
 @keyframes pulse-dot {
@@ -5865,7 +5865,7 @@ a.contact-direct-value:hover {
   gap: 2.75rem;
 }
 
-/* CADRE CINÉMA LECTEUR VIDÉO */
+/* CADRE CINÃMA LECTEUR VIDÃO */
 .demo-video-container {
   background: #FFFFFF;
   border: 1px solid #E5E0D5;
@@ -5894,7 +5894,7 @@ a.contact-direct-value:hover {
   display: block;
 }
 
-/* BARRE D'INFORMATIONS SOUS LA VIDÉO */
+/* BARRE D'INFORMATIONS SOUS LA VIDÃO */
 .demo-video-info {
   margin-top: 1.75rem;
   padding-top: 1.5rem;
@@ -5958,7 +5958,7 @@ a.contact-direct-value:hover {
   max-width: 65rem;
 }
 
-/* PLACEHOLDER VIDÉO EN ATTENTE */
+/* PLACEHOLDER VIDÃO EN ATTENTE */
 .demo-placeholder-box {
   background: linear-gradient(180deg, #FDFBF7 0%, #F8F5EE 100%);
   border: 2px dashed #D6CEBE;
@@ -6040,7 +6040,7 @@ a.contact-direct-value:hover {
   gap: 1rem;
 }
 
-/* CARTE DES 4 FONCTIONNALITÉS DÉMONTRÉES */
+/* CARTE DES 4 FONCTIONNALITÃS DÃMONTRÃES */
 .demo-features-card {
   background: #FFFFFF;
   border: 1px solid #E5E0D5;
@@ -6233,7 +6233,7 @@ a.contact-direct-value:hover {
   transform: translateY(-2px);
 }
 
-/* RESPONSIVE DESIGN SPÉCIFIQUE */
+/* RESPONSIVE DESIGN SPÃCIFIQUE */
 @media (max-width: 1200px) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -6290,7 +6290,7 @@ a.contact-direct-value:hover {
 
 
 /* ==========================================================================
-   VCHEQUE CHECKOUT SUCCESS (/commander/succes) — LUXURY BANKING STYLING
+   VCHEQUE CHECKOUT SUCCESS (/commander/succes) â LUXURY BANKING STYLING
    ========================================================================== */
 
 .success-container {
@@ -6608,7 +6608,7 @@ a.contact-direct-value:hover {
 }
 
 /* ==========================================================================
-   PAGE MENTIONS L�GALES � LUXURY BANKING & REGULATORY COMPLIANCE
+   PAGE MENTIONS LÉGALES  LUXURY BANKING & REGULATORY COMPLIANCE
    ========================================================================== */
 .legal-hero {
   padding: clamp(3.5rem, 6vw, 5.5rem) 1.5rem 3rem 1.5rem;
@@ -6683,15 +6683,23 @@ a.contact-direct-value:hover {
   align-items: start;
 }
 
-/* Sommaire lat�ral (Sticky TOC) */
-.legal-toc {
+/* Sommaire latéral (Sticky TOC) */
+.legal-toc-wrapper {
+  position: -webkit-sticky;
   position: sticky;
-  top: calc(var(--header-h, 80px) + 20px);
+  top: 96px;
+  align-self: start;
+  z-index: 20;
+}
+
+.legal-toc {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 18px rgba(16, 44, 37, 0.04);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 .legal-toc-title {
@@ -6742,7 +6750,7 @@ a.contact-direct-value:hover {
   min-width: 0;
 }
 
-/* Bo�te d'alerte / avertissement bancaire */
+/* Boîte d'alerte / avertissement bancaire */
 .legal-notice-box {
   background: rgba(185, 154, 90, 0.12);
   border: 1px solid var(--gold-500);
@@ -6858,7 +6866,7 @@ a.contact-direct-value:hover {
   font-weight: 700;
 }
 
-/* Grille des banques alg�riennes */
+/* Grille des banques algériennes */
 .legal-banks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -6892,7 +6900,7 @@ a.contact-direct-value:hover {
   color: var(--gold-700);
 }
 
-/* Puces dor�es */
+/* Puces dorées */
 .legal-gold-list {
   list-style: none;
   padding: 0;
@@ -6925,10 +6933,12 @@ a.contact-direct-value:hover {
     grid-template-columns: 1fr;
     gap: 1.75rem;
   }
+  .legal-toc-wrapper,
   .legal-toc {
     position: relative;
     top: 0;
     width: 100%;
+    max-height: none;
   }
   .legal-info-row {
     flex-direction: column;
@@ -6943,7 +6953,7 @@ a.contact-direct-value:hover {
   }
 }
 
-/* Modifier pour bo�te d'engagement solennel Zero-Knowledge (Privacy) */
+/* Modifier pour boîte d'engagement solennel Zero-Knowledge (Privacy) */
 .legal-notice-box--emerald {
   background: rgba(25, 61, 50, 0.08);
   border-color: var(--green-800);
@@ -6956,4 +6966,90 @@ a.contact-direct-value:hover {
 
 .legal-notice-box--emerald .legal-notice-text {
   color: var(--green-900);
+}
+
+/* Boutons d'action des pages légales (Mentions légales, Confidentialité, CGV) */
+.legal-action-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legal-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.85rem 1.75rem !important;
+  border-radius: 9999px !important;
+  background-color: #102C25 !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(16, 44, 37, 0.18) !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid #102C25 !important;
+  cursor: pointer !important;
+}
+
+.legal-btn-primary:hover {
+  background-color: #16382E !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(16, 44, 37, 0.25) !important;
+}
+
+.legal-btn-primary .btn-icon,
+.legal-btn-primary svg {
+  color: #B99A5A !important;
+}
+
+.legal-btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.85rem 1.75rem !important;
+  border-radius: 9999px !important;
+  background-color: #FFFFFF !important;
+  color: #102C25 !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  text-decoration: none !important;
+  border: 1.5px solid #B99A5A !important;
+  box-shadow: 0 2px 8px rgba(185, 154, 90, 0.1) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.legal-btn-secondary:hover {
+  background-color: #F7F4EC !important;
+  color: #102C25 !important;
+  border-color: #96763D !important;
+  transform: translateY(-1px) !important;
+}
+
+.legal-btn-secondary .btn-icon,
+.legal-btn-secondary svg {
+  color: #B99A5A !important;
+}
+
+@media (max-width: 640px) {
+  .legal-action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .legal-btn-primary,
+  .legal-btn-secondary {
+    width: 100% !important;
+  }
 }
