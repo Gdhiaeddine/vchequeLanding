@@ -1,4 +1,6 @@
 import PDFDocument from 'pdfkit';
+import path from 'path';
+import fs from 'fs';
 
 export interface InvoiceParams {
   orderRef: string;
@@ -17,22 +19,34 @@ export interface InvoiceParams {
 }
 
 /**
+ * Nettoie toute séquence de type "nombre / nombre" pour éviter les barres obliques entre chiffres
+ * ex: "10/11/2026" -> "10 - 11 - 2026"
+ */
+function removeSlashBetweenNumbers(value: string | null | undefined): string {
+  if (!value) return '';
+  return String(value).replace(/(\d+)\s*\/\s*(\d+)/g, '$1 - $2');
+}
+
+/**
  * Génère le document officiel de facture acquittée A4 au format PDF
- * selon la charte Luxury Banking & Enterprise Security et la Loi 18-05.
+ * en style monochrome noir & blanc minimaliste, haute fidélité financière,
+ * exactement sur 1 page unique, avec la typographie officielle de la marque VCheque.
  */
 export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
+      // Configuration de la page A4 (595.28 x 841.89 pt) avec marges contrôlées
       const doc = new PDFDocument({
         size: 'A4',
+        autoFirstPage: true,
         margins: {
-          top: 56.7, // 20mm
-          bottom: 56.7,
-          left: 42.5, // 15mm
-          right: 42.5,
+          top: 36,
+          bottom: 30,
+          left: 40,
+          right: 40,
         },
         info: {
-          Title: `Facture-${params.orderRef}`,
+          Title: `Facture-${removeSlashBetweenNumbers(params.orderRef)}`,
           Author: 'Virtanis Technologies',
           Subject: 'Facture Officielle VCheque Acquittée',
           Keywords: 'VCheque, Facture, Virtanis, Licence, Algérie',
@@ -44,56 +58,83 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', reject);
 
-      const pageWidth = 595.28;
-      const marginX = 42.5;
-      const contentWidth = 510.28;
+      // Chargement de la police de la marque (DM Serif Display - identique au site)
+      const fontTtfPath = path.join(process.cwd(), 'public', 'fonts', 'DMSerifDisplay-Regular.ttf');
+      let brandFont = 'Times-Bold';
+      if (fs.existsSync(fontTtfPath)) {
+        try {
+          doc.registerFont('BrandSerif', fontTtfPath);
+          brandFont = 'BrandSerif';
+        } catch {
+          brandFont = 'Times-Bold';
+        }
+      }
+
+      const marginX = 40;
+      const contentWidth = 515.28; // 595.28 - 80
       const rightX = marginX + contentWidth;
 
-      // Palette Luxury Banking
-      const COLOR_GREEN_DARK = '#102C25';
-      const COLOR_GOLD = '#B99A5A';
-      const COLOR_GOLD_DARK = '#7A5F2E';
-      const COLOR_IVORY = '#F7F4EC';
-      const COLOR_BORDER = '#E5DFD3';
-      const COLOR_TEXT_MUTED = '#556660';
-      const COLOR_TEXT_FAINT = '#7A8B84';
-      const COLOR_SUCCESS_BG = '#F1F8F4';
-      const COLOR_SUCCESS_TXT = '#137333';
+      // Palette Monochrome (Noir, Blanc et Niveaux de Gris Professionnels)
+      const COLOR_BLACK = '#000000';
+      const COLOR_BODY = '#222222';
+      const COLOR_MUTED = '#555555';
+      const COLOR_FAINT = '#777777';
+      const COLOR_BORDER = '#D1D5DB';
+      const COLOR_BORDER_LIGHT = '#E5E7EB';
+      const COLOR_BG_LIGHT = '#F8F9FA';
 
-      const paymentDate = params.paidAt || new Date();
-      const dateStr = paymentDate.toLocaleDateString('fr-DZ', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+      // Formatage de la date en toutes lettres pour éliminer tout slash entre chiffres
+      const MONTHS_FR = [
+        'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+        'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+      ];
+      const paymentDate = params.paidAt ? new Date(params.paidAt) : new Date();
+      const dayStr = String(paymentDate.getDate()).padStart(2, '0');
+      const monthStr = MONTHS_FR[paymentDate.getMonth()] || '';
+      const yearStr = paymentDate.getFullYear();
+      const dateStr = `${dayStr} ${monthStr} ${yearStr}`;
 
+      // Montant formaté (ex: 25 000,00 DZD)
       const formattedAmount = new Intl.NumberFormat('fr-DZ', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(params.amount);
 
-      // ==========================================
-      // SECTION A : EN-TÊTE INSTITUTIONNEL
-      // ==========================================
-      const headerY = 56.7;
+      const cleanOrderRef = removeSlashBetweenNumbers(params.orderRef);
+      const cleanTransactionId = removeSlashBetweenNumbers(params.transactionId || params.orderRef);
+      const cleanPhone = removeSlashBetweenNumbers(params.phone);
+      const cleanAddress = removeSlashBetweenNumbers(params.address);
+      const cleanVille = removeSlashBetweenNumbers(params.ville);
+      const cleanWilaya = removeSlashBetweenNumbers(params.wilaya);
 
-      // Logo VCheque
-      doc.font('Helvetica-Bold').fontSize(22).fillColor(COLOR_GREEN_DARK);
-      doc.text('V', marginX, headerY, { continued: true });
-      doc.fillColor(COLOR_GOLD).text('Cheque');
+      // ==========================================
+      // 1. EN-TÊTE ÉPURÉ (MONOCHROME NOIR & BLANC)
+      // ==========================================
+      const headerY = 38;
+
+      // Nom de marque VCheque dans la police du site (DM Serif Display)
+      doc.font(brandFont).fontSize(26).fillColor(COLOR_BLACK);
+      doc.text('VCheque', marginX, headerY);
 
       doc
         .font('Helvetica')
         .fontSize(8.5)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text("Solution d'Impression Bancaire Professionnelle — Par Virtanis", marginX, headerY + 28);
+        .fillColor(COLOR_MUTED)
+        .text("Solution d'Impression & Gestion de Chèques Bancaires — Édité par Virtanis", marginX, headerY + 28);
 
-      // Bloc Titre & Référence à Droite
       doc
-        .font('Helvetica-Bold')
+        .font('Helvetica')
+        .fontSize(7.5)
+        .fillColor(COLOR_FAINT)
+        .text('www.virtanis.net • support@virtanis.dz', marginX, headerY + 41);
+
+      // Bloc de droite : Facture, Référence, Date & Statut
+      // Titre Facture Acquittée
+      doc
+        .font(brandFont)
         .fontSize(16)
-        .fillColor(COLOR_GREEN_DARK)
-        .text('FACTURE ACQUITTÉE', marginX, headerY, {
+        .fillColor(COLOR_BLACK)
+        .text('FACTURE ACQUITTÉE', marginX, headerY + 2, {
           align: 'right',
           width: contentWidth,
         });
@@ -101,283 +142,280 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       doc
         .font('Helvetica-Bold')
         .fontSize(9.5)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(`Réf. Commande : ${params.orderRef}`, marginX, headerY + 22, {
+        .fillColor(COLOR_BLACK)
+        .text(`N° Commande : ${cleanOrderRef}`, marginX, headerY + 23, {
           align: 'right',
           width: contentWidth,
         });
-
-      doc
-        .font('Helvetica')
-        .fontSize(9)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text(`Date d'encaissement : ${dateStr}`, marginX, headerY + 36, {
-          align: 'right',
-          width: contentWidth,
-        });
-
-      // Badge vert pastel "✓ RÈGLEMENT REÇU"
-      const badgeWidth = 118;
-      const badgeHeight = 17;
-      const badgeX = rightX - badgeWidth;
-      const badgeY = headerY + 52;
-
-      doc
-        .roundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 4)
-        .fillAndStroke(COLOR_SUCCESS_BG, '#C3E6CB');
-
-      doc
-        .font('Helvetica-Bold')
-        .fontSize(8)
-        .fillColor(COLOR_SUCCESS_TXT)
-        .text('✓  RÈGLEMENT REÇU', badgeX, badgeY + 4, {
-          width: badgeWidth,
-          align: 'center',
-        });
-
-      // ==========================================
-      // SECTION B : CARTOUCHES D'IDENTIFICATION EN 2 COLONNES
-      // ==========================================
-      const cartoucheY = 138;
-      const colWidth = (contentWidth - 14) / 2; // 248.14 pt
-      const colHeight = 88;
-
-      // Cartouche Émetteur (Gauche)
-      doc
-        .roundedRect(marginX, cartoucheY, colWidth, colHeight, 6)
-        .fillAndStroke(COLOR_IVORY, COLOR_BORDER);
-
-      doc
-        .font('Helvetica-Bold')
-        .fontSize(7.5)
-        .fillColor(COLOR_GOLD_DARK)
-        .text('ÉDITEUR / ÉMETTEUR', marginX + 12, cartoucheY + 10);
-
-      doc
-        .font('Helvetica-Bold')
-        .fontSize(10)
-        .fillColor(COLOR_GREEN_DARK)
-        .text('Virtanis Technologies', marginX + 12, cartoucheY + 24);
 
       doc
         .font('Helvetica')
         .fontSize(8.5)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text('Plateforme VCheque Algérie', marginX + 12, cartoucheY + 38)
-        .text('virtanis.net  •  support@virtanis.dz', marginX + 12, cartoucheY + 51);
+        .fillColor(COLOR_MUTED)
+        .text(`Date d'émission : ${dateStr}`, marginX, headerY + 36, {
+          align: 'right',
+          width: contentWidth,
+        });
+
+      // Statut simple sans rectangle lourd
+      doc
+        .font('Helvetica')
+        .fontSize(8)
+        .fillColor(COLOR_BODY)
+        .text('Règlement reçu en ligne (SlickPay — CIB, Edahabia)', marginX, headerY + 48, {
+          align: 'right',
+          width: contentWidth,
+        });
+
+      // Ligne séparatrice supérieure fine
+      const lineY1 = headerY + 68;
+      doc
+        .moveTo(marginX, lineY1)
+        .lineTo(rightX, lineY1)
+        .strokeColor(COLOR_BLACK)
+        .lineWidth(1)
+        .stroke();
+
+      // ==========================================
+      // 2. CARTOUCHES PARTENAIRES (ÉDITEUR & CLIENT)
+      // ==========================================
+      const partyY = lineY1 + 12;
+      const colWidth = (contentWidth - 16) / 2;
+      const clientX = marginX + colWidth + 16;
+      const boxHeight = 76;
+
+      // Cartouche Éditeur (Gauche)
+      doc
+        .roundedRect(marginX, partyY, colWidth, boxHeight, 4)
+        .strokeColor(COLOR_BORDER_LIGHT)
+        .lineWidth(0.75)
+        .stroke();
 
       doc
-        .font('Helvetica-Oblique')
+        .font('Helvetica-Bold')
         .fontSize(7.5)
-        .fillColor(COLOR_TEXT_FAINT)
-        .text('Alger, Algérie — Conforme Loi 18-05 E-Commerce', marginX + 12, cartoucheY + 67);
+        .fillColor(COLOR_FAINT)
+        .text('ÉDITEUR & PRESTATAIRE', marginX + 10, partyY + 8);
+
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(9.5)
+        .fillColor(COLOR_BLACK)
+        .text('Virtanis Technologies', marginX + 10, partyY + 20);
+
+      doc
+        .font('Helvetica')
+        .fontSize(8)
+        .fillColor(COLOR_MUTED)
+        .text('Plateforme VCheque Algérie', marginX + 10, partyY + 33)
+        .text('Alger, Algérie • Conforme Loi 18-05 E-Commerce', marginX + 10, partyY + 45)
+        .text('support@virtanis.dz • www.virtanis.net', marginX + 10, partyY + 57);
 
       // Cartouche Client (Droite)
-      const clientX = marginX + colWidth + 14;
-
       doc
-        .roundedRect(clientX, cartoucheY, colWidth, colHeight, 6)
-        .fillAndStroke(COLOR_IVORY, COLOR_BORDER);
+        .roundedRect(clientX, partyY, colWidth, boxHeight, 4)
+        .strokeColor(COLOR_BORDER_LIGHT)
+        .lineWidth(0.75)
+        .stroke();
 
       doc
         .font('Helvetica-Bold')
         .fontSize(7.5)
-        .fillColor(COLOR_GOLD_DARK)
-        .text('CLIENT / FACTURÉ À', clientX + 12, cartoucheY + 10);
+        .fillColor(COLOR_FAINT)
+        .text('CLIENT & DESTINATAIRE', clientX + 10, partyY + 8);
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(10)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(params.customerName, clientX + 12, cartoucheY + 24);
+        .fontSize(9.5)
+        .fillColor(COLOR_BLACK)
+        .text(params.customerName, clientX + 10, partyY + 20);
 
+      let clientSubY = partyY + 33;
       if (params.company) {
         doc
           .font('Helvetica-Bold')
-          .fontSize(8.5)
-          .fillColor(COLOR_GREEN_DARK)
-          .text(params.company, clientX + 12, cartoucheY + 38);
+          .fontSize(8)
+          .fillColor(COLOR_BODY)
+          .text(params.company, clientX + 10, clientSubY);
+        clientSubY += 12;
       }
 
-      const clientContactY = params.company ? cartoucheY + 51 : cartoucheY + 38;
-      const clientAddressY = params.company ? cartoucheY + 66 : cartoucheY + 53;
-
-      doc
-        .font('Helvetica')
-        .fontSize(8.5)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text(`${params.email}${params.phone ? `  •  ${params.phone}` : ''}`, clientX + 12, clientContactY);
-
-      const addressStr = [params.address, params.ville, params.wilaya ? `(${params.wilaya})` : '']
-        .filter(Boolean)
-        .join('  •  ') || 'Alger, Algérie';
-
+      const clientContact = [params.email, cleanPhone].filter(Boolean).join(' • ');
       doc
         .font('Helvetica')
         .fontSize(8)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text(addressStr, clientX + 12, clientAddressY, {
-          width: colWidth - 24,
+        .fillColor(COLOR_MUTED)
+        .text(clientContact, clientX + 10, clientSubY);
+
+      clientSubY += 12;
+      const clientLocation = [cleanAddress, cleanVille, cleanWilaya ? `(${cleanWilaya})` : '']
+        .filter(Boolean)
+        .join(' • ') || 'Algérie';
+
+      doc
+        .font('Helvetica')
+        .fontSize(7.5)
+        .fillColor(COLOR_MUTED)
+        .text(clientLocation, clientX + 10, clientSubY, {
+          width: colWidth - 20,
           ellipsis: true,
         });
 
       // ==========================================
-      // SECTION C : TABLEAU DES PRESTATIONS FACTURÉES
+      // 3. TABLEAU DES PRESTATIONS FACTURÉES
       // ==========================================
-      const tableY = 244;
-      const thHeight = 22;
+      const tableY = partyY + boxHeight + 14;
+      const thHeight = 20;
 
-      // Bandeau d'en-tête du tableau
+      // En-tête du tableau : bandeau noir pur avec texte blanc
       doc
         .rect(marginX, tableY, contentWidth, thHeight)
-        .fill(COLOR_GREEN_DARK);
+        .fill(COLOR_BLACK);
 
       doc.font('Helvetica-Bold').fontSize(8).fillColor('#FFFFFF');
-      doc.text('DÉSIGNATION', marginX + 12, tableY + 7);
-      doc.text('QTÉ', marginX + 285, tableY + 7, { width: 35, align: 'center' });
-      doc.text('PRIX UNITAIRE HT', marginX + 325, tableY + 7, { width: 85, align: 'right' });
-      doc.text('TOTAL DZD', marginX + 415, tableY + 7, { width: 85, align: 'right' });
+      doc.text('DÉSIGNATION DU LOGICIEL', marginX + 10, tableY + 6);
+      doc.text('QTÉ', marginX + 295, tableY + 6, { width: 30, align: 'center' });
+      doc.text('PRIX UNITAIRE HT', marginX + 335, tableY + 6, { width: 85, align: 'right' });
+      doc.text('TOTAL DZD', marginX + 425, tableY + 6, { width: 80, align: 'right' });
 
       // Ligne de prestation
-      const rowY = tableY + thHeight + 12;
+      const rowY = tableY + thHeight + 10;
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(9.5)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(params.planTitle || 'Licence Commerciale VCheque (Perpétuelle)', marginX + 12, rowY);
+        .fontSize(9)
+        .fillColor(COLOR_BLACK)
+        .text(params.planTitle || 'Licence Commerciale VCheque (Perpétuelle)', marginX + 10, rowY);
 
       doc
         .font('Helvetica')
         .fontSize(8)
-        .fillColor(COLOR_TEXT_MUTED)
+        .fillColor(COLOR_MUTED)
         .text(
-          'Licence permanente pour 1 poste de travail Windows. Préparation, mise en page et impression haute précision des chèques bancaires algériens (BNA, BEA, CPA, BDL, BADR, CNEP, Baraka, Al Salam, CCP).',
-          marginX + 12,
-          rowY + 15,
-          { width: 265, lineGap: 2.5 }
+          'Licence permanente pour poste de travail Windows. Préparation, mise en page et impression haute précision des chèques bancaires algériens (BNA, BEA, CPA, BDL, BADR, CNEP, Al Baraka, Al Salam, CCP).',
+          marginX + 10,
+          rowY + 14,
+          { width: 275, lineGap: 2 }
         );
 
-      // Badge Clé d'Activation
-      const keyBadgeY = rowY + 52;
-      const keyBadgeWidth = 265;
-      const keyBadgeHeight = 18;
+      // Boîte simple de clé d'activation (monochrome)
+      const keyBoxY = rowY + 50;
+      const keyBoxWidth = 275;
+      const keyBoxHeight = 18;
 
       doc
-        .roundedRect(marginX + 12, keyBadgeY, keyBadgeWidth, keyBadgeHeight, 4)
-        .fillAndStroke(COLOR_IVORY, COLOR_BORDER);
+        .roundedRect(marginX + 10, keyBoxY, keyBoxWidth, keyBoxHeight, 3)
+        .fillAndStroke(COLOR_BG_LIGHT, COLOR_BORDER);
 
       doc
         .font('Courier-Bold')
         .fontSize(8.5)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(`Clé : ${params.licenseKey}`, marginX + 18, keyBadgeY + 4, {
-          width: keyBadgeWidth - 12,
+        .fillColor(COLOR_BLACK)
+        .text(`Clé : ${removeSlashBetweenNumbers(params.licenseKey)}`, marginX + 16, keyBoxY + 4, {
+          width: keyBoxWidth - 12,
         });
 
       // Quantité, Prix unitaire, Total
       doc
         .font('Helvetica')
-        .fontSize(9.5)
-        .fillColor(COLOR_GREEN_DARK)
-        .text('1', marginX + 285, rowY + 6, { width: 35, align: 'center' });
+        .fontSize(9)
+        .fillColor(COLOR_BLACK)
+        .text('1', marginX + 295, rowY + 6, { width: 30, align: 'center' });
 
       doc
         .font('Helvetica')
         .fontSize(9)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(`${formattedAmount} DZD`, marginX + 325, rowY + 6, { width: 85, align: 'right' });
+        .fillColor(COLOR_BLACK)
+        .text(`${formattedAmount} DZD`, marginX + 335, rowY + 6, { width: 85, align: 'right' });
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(9.5)
-        .fillColor(COLOR_GREEN_DARK)
-        .text(`${formattedAmount} DZD`, marginX + 415, rowY + 6, { width: 85, align: 'right' });
+        .fontSize(9)
+        .fillColor(COLOR_BLACK)
+        .text(`${formattedAmount} DZD`, marginX + 425, rowY + 6, { width: 80, align: 'right' });
 
-      // Ligne séparatrice inférieure de tableau
-      const tableBottomY = keyBadgeY + keyBadgeHeight + 14;
+      // Ligne séparatrice inférieure du tableau
+      const tableBottomY = keyBoxY + keyBoxHeight + 12;
       doc
         .moveTo(marginX, tableBottomY)
         .lineTo(rightX, tableBottomY)
         .strokeColor(COLOR_BORDER)
-        .lineWidth(1)
+        .lineWidth(0.75)
         .stroke();
 
       // ==========================================
-      // SECTION D : RÈGLEMENT, CACHET & TOTAUX
+      // 4. ZONE INFÉRIEURE : PAIEMENT, CACHET & TOTAUX
       // ==========================================
-      const bottomZoneY = tableBottomY + 16;
+      const bottomZoneY = tableBottomY + 14;
       const leftColWidth = 265;
       const rightColWidth = 225;
       const rightColX = rightX - rightColWidth;
 
-      // 1. Bloc Informations de Paiement (Gauche)
-      const payBoxHeight = 56;
+      // 1. Informations de Règlement (Gauche)
+      const payBoxHeight = 52;
       doc
-        .roundedRect(marginX, bottomZoneY, leftColWidth, payBoxHeight, 6)
-        .fillAndStroke(COLOR_IVORY, COLOR_BORDER);
+        .roundedRect(marginX, bottomZoneY, leftColWidth, payBoxHeight, 4)
+        .fillAndStroke(COLOR_BG_LIGHT, COLOR_BORDER_LIGHT);
 
       doc
         .font('Helvetica-Bold')
         .fontSize(7.5)
-        .fillColor(COLOR_GOLD_DARK)
-        .text('RÈGLEMENT SÉCURISÉ SLICKPAY', marginX + 12, bottomZoneY + 8);
+        .fillColor(COLOR_FAINT)
+        .text('RÈGLEMENT SÉCURISÉ SLICKPAY', marginX + 10, bottomZoneY + 7);
 
       doc
         .font('Helvetica')
         .fontSize(8)
-        .fillColor(COLOR_GREEN_DARK)
-        .text('Passerelle : Carte CIB / Edahabia (SATIM)', marginX + 12, bottomZoneY + 21)
-        .text(
-          `ID Transaction : ${params.transactionId || params.orderRef}`,
-          marginX + 12,
-          bottomZoneY + 33
-        );
+        .fillColor(COLOR_BODY)
+        .text('Passerelle : Carte CIB, Edahabia (SATIM)', marginX + 10, bottomZoneY + 19)
+        .text(`ID Transaction : ${cleanTransactionId}`, marginX + 10, bottomZoneY + 30);
 
       doc
         .font('Helvetica-Bold')
         .fontSize(8)
-        .fillColor(COLOR_SUCCESS_TXT)
-        .text('✓ Facture Soldée et Acquittée en ligne', marginX + 12, bottomZoneY + 44);
+        .fillColor(COLOR_BLACK)
+        .text('Facture acquittée et soldée en ligne', marginX + 10, bottomZoneY + 41);
 
-      // 2. Cachet Électronique Virtanis (Gauche)
-      const sealY = bottomZoneY + payBoxHeight + 12;
-      const sealHeight = 72;
+      // 2. Cachet Électronique Virtanis épuré (Gauche)
+      const sealY = bottomZoneY + payBoxHeight + 10;
+      const sealHeight = 62;
+
+      // Double cadre sobre monochrome
+      doc
+        .roundedRect(marginX, sealY, leftColWidth, sealHeight, 4)
+        .strokeColor(COLOR_BLACK)
+        .lineWidth(0.75)
+        .stroke();
 
       doc
-        .roundedRect(marginX, sealY, leftColWidth, sealHeight, 6)
-        .fillAndStroke('#FFFFFF', COLOR_GOLD);
-
-      // Bordure intérieure fine or
-      doc
-        .roundedRect(marginX + 3, sealY + 3, leftColWidth - 6, sealHeight - 6, 4)
-        .strokeColor('#E0DACB')
-        .lineWidth(0.8)
+        .roundedRect(marginX + 2.5, sealY + 2.5, leftColWidth - 5, sealHeight - 5, 2.5)
+        .strokeColor(COLOR_BORDER_LIGHT)
+        .lineWidth(0.5)
         .stroke();
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(8)
-        .fillColor(COLOR_GREEN_DARK)
-        .text('CACHET ÉLECTRONIQUE VIRTANIS', marginX, sealY + 10, {
+        .fontSize(7.5)
+        .fillColor(COLOR_BLACK)
+        .text('CACHET ÉLECTRONIQUE VIRTANIS', marginX, sealY + 8, {
           width: leftColWidth,
           align: 'center',
         });
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(9)
-        .fillColor(COLOR_GOLD)
-        .text(`★  ACQUITTÉ LE ${dateStr}  ★`, marginX, sealY + 23, {
+        .fontSize(8.5)
+        .fillColor(COLOR_BLACK)
+        .text(`ACQUITTÉ LE ${dateStr.toUpperCase()}`, marginX, sealY + 20, {
           width: leftColWidth,
           align: 'center',
         });
 
       doc
         .font('Helvetica')
-        .fontSize(7.5)
-        .fillColor(COLOR_TEXT_MUTED)
-        .text('Signature Numérique & Intégrité Certifiées', marginX, sealY + 38, {
+        .fontSize(7)
+        .fillColor(COLOR_MUTED)
+        .text('Signature Numérique & Intégrité Certifiées', marginX, sealY + 33, {
           width: leftColWidth,
           align: 'center',
         });
@@ -385,106 +423,107 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       doc
         .font('Helvetica-Bold')
         .fontSize(6.5)
-        .fillColor(COLOR_TEXT_FAINT)
-        .text('VIRTANIS TECHNOLOGIES ALGERIA  •  AUTHENTICITÉ GARANTIE', marginX, sealY + 52, {
+        .fillColor(COLOR_FAINT)
+        .text('VIRTANIS TECHNOLOGIES ALGERIA • AUTHENTICITÉ GARANTIE', marginX, sealY + 46, {
           width: leftColWidth,
           align: 'center',
         });
 
       // 3. Tableau des Totaux (Droite)
-      let curTotY = bottomZoneY + 4;
+      let curTotY = bottomZoneY + 2;
 
-      // Ligne Total HT
+      // Total HT
       doc
         .font('Helvetica')
         .fontSize(8.5)
-        .fillColor(COLOR_TEXT_MUTED)
+        .fillColor(COLOR_MUTED)
         .text('Total Hors Taxes (HT)', rightColX, curTotY);
+
       doc
         .font('Helvetica-Bold')
         .fontSize(9)
-        .fillColor(COLOR_GREEN_DARK)
+        .fillColor(COLOR_BLACK)
         .text(`${formattedAmount} DZD`, rightColX, curTotY, { width: rightColWidth, align: 'right' });
 
-      curTotY += 18;
+      curTotY += 16;
       doc
         .moveTo(rightColX, curTotY)
         .lineTo(rightX, curTotY)
-        .strokeColor(COLOR_BORDER)
+        .strokeColor(COLOR_BORDER_LIGHT)
         .lineWidth(0.5)
         .stroke();
 
-      curTotY += 8;
-      // Ligne TVA
+      curTotY += 6;
+      // TVA
       doc
         .font('Helvetica')
         .fontSize(8)
-        .fillColor(COLOR_TEXT_MUTED)
+        .fillColor(COLOR_MUTED)
         .text('TVA (Exonération Logiciel)', rightColX, curTotY);
+
       doc
         .font('Helvetica')
         .fontSize(8.5)
-        .fillColor(COLOR_TEXT_MUTED)
+        .fillColor(COLOR_MUTED)
         .text('0,00 DZD', rightColX, curTotY, { width: rightColWidth, align: 'right' });
 
-      curTotY += 18;
+      curTotY += 16;
       doc
         .moveTo(rightColX, curTotY)
         .lineTo(rightX, curTotY)
-        .strokeColor(COLOR_BORDER)
+        .strokeColor(COLOR_BORDER_LIGHT)
         .lineWidth(0.5)
         .stroke();
 
-      curTotY += 12;
-
-      // Bloc NET À PAYER Vert Impérial & Or
+      curTotY += 10;
+      // Bloc NET À PAYER (Monochrome : Noir plein avec texte blanc)
       const totalBoxHeight = 44;
       doc
-        .roundedRect(rightColX, curTotY, rightColWidth, totalBoxHeight, 6)
-        .fill(COLOR_GREEN_DARK);
+        .roundedRect(rightColX, curTotY, rightColWidth, totalBoxHeight, 4)
+        .fill(COLOR_BLACK);
 
       doc
         .font('Helvetica-Bold')
         .fontSize(8)
         .fillColor('#FFFFFF')
-        .text('NET À PAYER (TTC)', rightColX + 12, curTotY + 10);
+        .text('NET À PAYER (TTC)', rightColX + 10, curTotY + 9);
 
       doc
         .font('Helvetica-Bold')
-        .fontSize(13)
-        .fillColor(COLOR_GOLD)
-        .text(`${formattedAmount} DZD`, rightColX + 12, curTotY + 8, {
-          width: rightColWidth - 24,
+        .fontSize(12.5)
+        .fillColor('#FFFFFF')
+        .text(`${formattedAmount} DZD`, rightColX + 10, curTotY + 8, {
+          width: rightColWidth - 20,
           align: 'right',
         });
 
       doc
         .font('Helvetica')
         .fontSize(7)
-        .fillColor('#F5E8C7')
-        .text('Facture entièrement acquittée par carte bancaire', rightColX + 12, curTotY + 27, {
-          width: rightColWidth - 24,
+        .fillColor('#D1D5DB')
+        .text('Facture entièrement acquittée par carte bancaire', rightColX + 10, curTotY + 27, {
+          width: rightColWidth - 20,
           align: 'right',
         });
 
       // ==========================================
-      // SECTION E : PIED DE PAGE RÉGLEMENTAIRE
+      // 5. PIED DE PAGE RÉGLEMENTAIRE (STRICTEMENT 1 PAGE)
       // ==========================================
-      const footerY = 752;
+      const footerY = 745;
 
       doc
         .moveTo(marginX, footerY)
         .lineTo(rightX, footerY)
         .strokeColor(COLOR_BORDER)
-        .lineWidth(0.8)
+        .lineWidth(0.75)
         .stroke();
 
       doc
         .font('Helvetica')
         .fontSize(7.5)
-        .fillColor(COLOR_TEXT_MUTED)
+        .fillColor(COLOR_MUTED)
         .text(
-          'Virtanis — Éditeur de solutions logicielles professionnelles — virtanis.net — contact@virtanis.dz',
+          'Virtanis — Éditeur de solutions logicielles professionnelles — www.virtanis.net — contact@virtanis.dz',
           marginX,
           footerY + 8,
           { width: contentWidth, align: 'center' }
@@ -493,22 +532,22 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
       doc
         .font('Helvetica')
         .fontSize(7)
-        .fillColor(COLOR_TEXT_FAINT)
+        .fillColor(COLOR_FAINT)
         .text(
           'Facture émise par voie électronique en conformité avec la Loi n° 18-05 relative au commerce électronique en Algérie.',
           marginX,
-          footerY + 20,
+          footerY + 19,
           { width: contentWidth, align: 'center' }
         );
 
       doc
         .font('Helvetica-Oblique')
-        .fontSize(7)
-        .fillColor(COLOR_TEXT_FAINT)
+        .fontSize(6.5)
+        .fillColor(COLOR_FAINT)
         .text(
           'Cette facture constitue votre titre de propriété de la licence logicielle VCheque.',
           marginX,
-          footerY + 31,
+          footerY + 29,
           { width: contentWidth, align: 'center' }
         );
 

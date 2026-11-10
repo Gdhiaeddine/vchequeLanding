@@ -98,9 +98,33 @@ describe('Checkout & Order Flow', () => {
     expect(pdf).toBeDefined();
     expect(Buffer.isBuffer(pdf)).toBe(true);
     expect(pdf.length).toBeGreaterThan(1000);
+    const pages = (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) || []).length;
+    expect(pages).toBe(1);
 
     // Verify valid PDF magic header (%PDF-)
     const header = pdf.subarray(0, 5).toString('ascii');
     expect(header).toBe('%PDF-');
+  });
+
+  it('generates a 1-page monochrome PDF invoice without slashes between numbers', async () => {
+    const pdf = await generateInvoicePdf({
+      orderRef: 'VC-20261110-TEST2',
+      customerName: 'Karim Zouaoui',
+      company: 'Eurl Sahara Logistics',
+      email: 'karim@sahara.dz',
+      phone: '0550/12/34/56',
+      address: 'Route 12/A Lot 44/2',
+      ville: 'Blida',
+      wilaya: '09/Blida',
+      amount: 18900,
+      licenseKey: 'VC-8888-9999-1111-2222',
+      paidAt: new Date('2026-11-10T10:00:00Z'),
+      transactionId: 'SLK-INV-99999',
+    });
+
+    const pages = (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) || []).length;
+    expect(pages).toBe(1);
+    const raw = pdf.toString('utf-8');
+    expect(raw).not.toMatch(/\d+\/\d+/);
   });
 });
