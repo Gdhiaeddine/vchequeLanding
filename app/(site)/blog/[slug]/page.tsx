@@ -126,7 +126,17 @@ export default async function BlogPostPage({ params }: PageProps) {
   });
 
   // Récupération des articles recommandés
-  let relatedPosts = await prisma.blogPost.findMany({
+  let relatedPosts: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    category: string;
+    excerpt: string | null;
+    cover_image_path: string | null;
+    published_at: Date | null;
+    updated_at: Date | null;
+    reading_time: number;
+  }> = await prisma.blogPost.findMany({
     where: {
       status: 'published',
       id: { not: post.id },
@@ -138,7 +148,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (relatedPosts.length < 3) {
     const remainingCount = 3 - relatedPosts.length;
-    const excludeIds = [post.id, ...relatedPosts.map((p) => p.id)];
+    const excludeIds = [post.id, ...relatedPosts.map((p: { id: number }) => p.id)];
     const additional = await prisma.blogPost.findMany({
       where: {
         status: 'published',
