@@ -6598,3 +6598,11 @@ a.contact-direct-value:hover {
     width: 100%;
   }
 }
+
+
+/* Center helper for checkout success hero lede */
+.checkout-hero .checkout-hero-inner .checkout-hero-lede {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}

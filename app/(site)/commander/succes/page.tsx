@@ -144,16 +144,16 @@ export default async function CheckoutSuccessPage({
     <>
       {/* 1. HERO HEADER DE CONFIRMATION */}
       <header className="checkout-hero" aria-labelledby="success-heading">
-        <div className="checkout-hero-inner max-w-4xl mx-auto text-center px-4">
+        <div className="checkout-hero-inner max-w-4xl mx-auto text-center px-4 flex flex-col items-center justify-center">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#B99A5A] mb-3 font-sans">
             CONFIRMATION
           </p>
 
-          <h1 id="success-heading" className="checkout-hero-title">
+          <h1 id="success-heading" className="checkout-hero-title text-center">
             Merci pour votre commande !
           </h1>
 
-          <p className="checkout-hero-lede mx-auto">
+          <p className="checkout-hero-lede !mx-auto !text-center">
             Votre paiement a été traité avec succès via SlickPay. Votre licence VCheque est prête.
           </p>
         </div>
