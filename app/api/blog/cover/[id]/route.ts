@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -31,24 +33,17 @@ export async function GET(
     return NextResponse.json({ error: 'Fichier physique introuvable' }, { status: 404 });
   }
 
-  const stat = fs.statSync(filePath);
-  const stream = fs.createReadStream(filePath);
+  const fileBuffer = fs.readFileSync(filePath);
   const ext = path.extname(filePath).toLowerCase();
-  const mime = ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg';
+  const mime =
+    ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg';
 
-  const webStream = new ReadableStream({
-    start(controller) {
-      stream.on('data', (chunk) => controller.enqueue(chunk));
-      stream.on('end', () => controller.close());
-      stream.on('error', (err) => controller.error(err));
-    },
-  });
-
-  return new NextResponse(webStream, {
+  return new NextResponse(fileBuffer, {
+    status: 200,
     headers: {
       'Content-Type': mime,
-      'Content-Length': stat.size.toString(),
-      'Cache-Control': 'public, max-age=86400',
+      'Content-Length': fileBuffer.length.toString(),
+      'Cache-Control': 'public, max-age=86400, immutable',
     },
   });
 }

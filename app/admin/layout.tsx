@@ -124,16 +124,14 @@ export default function AdminLayout({
       <aside className="admin-sidebar" aria-label="Menu principal administrateur">
         {/* Brand */}
         <Link href="/admin" className="sidebar-brand">
-          <div className="sidebar-brand-icon">
-            <Image
-              src="/img/vcheque-icon-128.png"
-              alt="VCheque"
-              width={28}
-              height={28}
-              className="brightness-110"
-              priority
-            />
-          </div>
+          <Image
+            src="/img/vcheque-icon-128.png"
+            alt="VCheque"
+            width={34}
+            height={34}
+            className="brightness-110 shrink-0"
+            priority
+          />
           <div>
             <h2 className="sidebar-brand-title">VCheque</h2>
             <span className="sidebar-brand-sub">ÉDITION COMMERCIALE</span>
@@ -199,14 +197,6 @@ export default function AdminLayout({
           </div>
           <div className="sidebar-footer-name">Virtanis Systems</div>
           <div className="sidebar-footer-email">admin@virtanis.dz</div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold text-red-300 hover:bg-red-950/40 hover:text-red-200 transition-colors border border-red-900/30"
-          >
-            <LogOut size={14} />
-            <span>Déconnexion sécurisée</span>
-          </button>
         </div>
       </aside>
 

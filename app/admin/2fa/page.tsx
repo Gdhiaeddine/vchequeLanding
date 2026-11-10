@@ -42,7 +42,7 @@ export default function TwoFactorChallengePage() {
           <ShieldCheck size={36} />
         </div>
 
-        <h1 className="text-2xl font-bold font-serif text-[#122620] mb-2">
+        <h1 className="text-2xl sm:text-3xl font-serif text-[#102C25] font-normal tracking-tight mb-2">
           Vérification à deux facteurs
         </h1>
         <p className="text-xs text-[#6b7c74] mb-8 leading-relaxed">

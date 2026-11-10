@@ -127,7 +127,7 @@ export default async function AdminDashboardPage() {
         <div className="dash-actions">
           <Link href="/admin/licenses/create" className="btn-pill-primary">
             <Plus size={16} />
-            <span>+ Nouvelle Licence</span>
+            <span>Nouvelle Licence</span>
           </Link>
           <Link href="/admin/licenses" className="btn-pill-secondary">
             <span>Explorer le Répertoire</span>

@@ -115,12 +115,12 @@ export default function Pricing() {
       <div className="container">
         {/* En-tête centré */}
         <div className="section-head section-head--center">
-          <p className="eyebrow">Tarifs et licences</p>
+          <p className="eyebrow">Tarif &amp; Licence</p>
           <h2 id="pricing-heading" className="section-title">
-            Choisissez votre licence VCheque
+            Licence Commerciale VCheque
           </h2>
           <p className="section-lede">
-            Choisissez la licence adaptée à votre activité et commandez VCheque en ligne.
+            Une licence perpétuelle complète sans abonnement pour automatiser et fiabiliser toutes vos impressions bancaires.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export default function Pricing() {
                   </svg>
                   <span>Licence commerciale Windows</span>
                 </span>
-                <span className="pricing-edition-tag">ÉDITION PROFESSIONNELLE</span>
+                <span className="pricing-edition-tag">LICENCE COMMERCIALE PERMANENTE</span>
               </div>
 
               <h3 className="pricing-name">VCheque</h3>

@@ -60,7 +60,7 @@ export default function CreateLicensePage() {
             <KeyRound size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold font-serif text-[#122620]">
+            <h2 className="text-3xl font-serif text-[#102C25] font-normal tracking-tight">
               Émettre une nouvelle licence
             </h2>
             <p className="text-xs text-[#6b7c74]">
@@ -155,17 +155,14 @@ export default function CreateLicensePage() {
 
             <div>
               <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
-                Édition
+                Édition de licence
               </label>
-              <select
-                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-sm focus:border-[#b99a5a] focus:outline-none"
-                value={formData.edition}
-                onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
-              >
-                <option value="COMMERCIAL">COMMERCIAL (Standard)</option>
-                <option value="ENTERPRISE">ENTERPRISE (Grand Compte)</option>
-                <option value="TRIAL">TRIAL (Démonstration)</option>
-              </select>
+              <div className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fcfaf5] text-sm text-[#122620] flex items-center justify-between">
+                <span className="font-semibold">Licence Commerciale Permanente</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
+                  Unique
+                </span>
+              </div>
             </div>
           </div>
 

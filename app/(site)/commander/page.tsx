@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { calculateDiscountBadge } from '@/lib/pricing';
@@ -68,9 +67,6 @@ const WILAYAS = [
 ];
 
 function CheckoutContent() {
-  const searchParams = useSearchParams();
-
-  const [selectedPlan, setSelectedPlan] = useState<'single' | 'duo' | 'enterprise'>('single');
   const [formData, setFormData] = useState({
     nom: '',
     email: '',
@@ -86,13 +82,6 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const planParam = searchParams.get('plan');
-    if (planParam === 'duo' || planParam === 'enterprise') {
-      setSelectedPlan(planParam);
-    }
-  }, [searchParams]);
-
   // Détermination du prix et des informations de licence depuis les variables d'environnement
   const envPrice = process.env.NEXT_PUBLIC_PRICE || '8500';
   const envPriceBefore = process.env.NEXT_PUBLIC_PRICE_BEFORE || '12000';
@@ -103,32 +92,20 @@ function CheckoutContent() {
   let amountNum = 8500;
   let formattedPrice = '8 500,00';
   let formattedPriceBefore: string | null = '12 000,00';
-  let deviceLabel = '1 poste de travail (mono-poste avec clé cryptographique)';
+  const deviceLabel = '1 poste de travail Windows (clé cryptographique permanente)';
 
-  if (selectedPlan === 'duo') {
-    amountNum = 8900;
-    formattedPrice = '8 900,00';
-    formattedPriceBefore = null;
-    deviceLabel = '2 postes de travail (2 ordinateurs Windows)';
-  } else if (selectedPlan === 'enterprise') {
-    amountNum = 18900;
-    formattedPrice = '18 900,00';
-    formattedPriceBefore = null;
-    deviceLabel = '5 postes de travail (Pack Entreprise & multi-postes)';
-  } else {
-    const num = Number(envPrice.replace(/\s/g, ''));
-    if (!isNaN(num)) {
-      amountNum = num;
-      formattedPrice = num
-        .toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        .replace(/\u202F/g, ' ');
-    }
-    const numBefore = Number(envPriceBefore.replace(/\s/g, ''));
-    if (!isNaN(numBefore)) {
-      formattedPriceBefore = numBefore
-        .toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        .replace(/\u202F/g, ' ');
-    }
+  const num = Number(envPrice.replace(/\s/g, ''));
+  if (!isNaN(num)) {
+    amountNum = num;
+    formattedPrice = num
+      .toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      .replace(/\u202F/g, ' ');
+  }
+  const numBefore = Number(envPriceBefore.replace(/\s/g, ''));
+  if (!isNaN(numBefore)) {
+    formattedPriceBefore = numBefore
+      .toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      .replace(/\u202F/g, ' ');
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,7 +135,7 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          plan: selectedPlan,
+          plan: 'single',
           amount: amountNum,
         }),
       });

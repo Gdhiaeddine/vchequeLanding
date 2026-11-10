@@ -39,7 +39,7 @@ export default async function AdminLicensesPage({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#e2dcce] shadow-sm">
         <div>
-          <h2 className="text-2xl font-bold font-serif text-[#122620]">Gestion des Licences</h2>
+          <h2 className="text-3xl font-serif text-[#102C25] font-normal tracking-tight">Gestion des Licences</h2>
           <p className="text-xs text-[#6b7c74] mt-0.5">
             {licenses.length} licence(s) répertoriée(s) dans le moteur cryptographique
           </p>
@@ -63,12 +63,12 @@ export default async function AdminLicensesPage({
               name="q"
               defaultValue={q || ''}
               placeholder="Rechercher par clé, titulaire, email, société..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-[#e2dcce] bg-[#fdfbf7] text-xs focus:border-[#b99a5a] focus:outline-none"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] placeholder-[#86928b] focus:border-[#b99a5a] focus:outline-none transition-all"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-[#122620] text-white text-xs font-semibold rounded-lg hover:bg-[#1a382f]"
+            className="px-4 py-2 bg-[#122620] !text-white text-xs font-semibold rounded-lg hover:bg-[#1a382f] transition-colors cursor-pointer"
           >
             Filtrer
           </button>
@@ -77,26 +77,26 @@ export default async function AdminLicensesPage({
         <div className="flex items-center gap-2 text-xs">
           <Link
             href="/admin/licenses"
-            className={`px-3 py-1.5 rounded-lg font-semibold ${
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
               !status || status === 'all'
-                ? 'bg-[#122620] text-white'
-                : 'bg-[#f4f0e6] text-[#122620]'
+                ? 'bg-[#122620] !text-white'
+                : 'bg-[#f4f0e6] !text-[#122620] hover:bg-[#e2dcce]'
             }`}
           >
             Toutes
           </Link>
           <Link
             href="/admin/licenses?status=active"
-            className={`px-3 py-1.5 rounded-lg font-semibold ${
-              status === 'active' ? 'bg-[#122620] text-white' : 'bg-[#f4f0e6] text-[#122620]'
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              status === 'active' ? 'bg-[#122620] !text-white' : 'bg-[#f4f0e6] !text-[#122620] hover:bg-[#e2dcce]'
             }`}
           >
             Actives
           </Link>
           <Link
             href="/admin/licenses?status=revoked"
-            className={`px-3 py-1.5 rounded-lg font-semibold ${
-              status === 'revoked' ? 'bg-[#122620] text-white' : 'bg-[#f4f0e6] text-[#122620]'
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+              status === 'revoked' ? 'bg-[#122620] !text-white' : 'bg-[#f4f0e6] !text-[#122620] hover:bg-[#e2dcce]'
             }`}
           >
             Révoquées
@@ -127,7 +127,7 @@ export default async function AdminLicensesPage({
                     <td className="p-4 font-mono font-bold text-[#122620]">
                       <Link
                         href={`/admin/licenses/${lic.id}`}
-                        className="hover:text-[#b99a5a] transition-colors"
+                        className="!text-[#122620] hover:!text-[#b99a5a] transition-colors"
                       >
                         {lic.license_key}
                       </Link>
@@ -176,7 +176,7 @@ export default async function AdminLicensesPage({
                     <td className="p-4 text-right">
                       <Link
                         href={`/admin/licenses/${lic.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#f4f0e6] text-[#122620] font-semibold hover:bg-[#b99a5a] hover:text-white transition-all text-[11px]"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#f4f0e6] !text-[#122620] font-semibold hover:bg-[#b99a5a] hover:!text-white transition-all text-[11px]"
                       >
                         <span>Détails</span>
                       </Link>

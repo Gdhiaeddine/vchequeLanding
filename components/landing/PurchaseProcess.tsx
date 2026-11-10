@@ -4,8 +4,8 @@ export default function PurchaseProcess() {
   const steps = [
     {
       step: '1',
-      title: 'Choisissez votre licence',
-      text: 'Consultez l\'offre sur cette page, puis accédez à la page d\'achat officielle pour renseigner votre commande.',
+      title: 'Commandez votre licence',
+      text: 'Accédez au formulaire officiel pour renseigner vos coordonnées et valider votre commande.',
     },
     {
       step: '2',

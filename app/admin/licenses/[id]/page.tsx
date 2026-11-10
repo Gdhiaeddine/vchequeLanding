@@ -81,7 +81,7 @@ export default function LicenseDetailPage() {
   if (!license || !license.license) {
     return (
       <div className="p-12 text-center">
-        <h2 className="text-xl font-bold text-[#122620]">Licence introuvable</h2>
+        <h2 className="text-2xl font-serif text-[#102C25] font-normal tracking-tight">Licence introuvable</h2>
         <Link href="/admin/licenses" className="btn btn-primary mt-4 inline-block">
           Retour aux licences
         </Link>
