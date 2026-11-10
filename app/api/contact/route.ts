@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/security/rate-limiter';
 
 // Validation regex for email and Algerian phone numbers
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DZ_PHONE_REGEX = /^(?:\+213|00213|0)(?:5|6|7|2[0-9]|3[0-9]|4[0-9])[0-9]{7,8}$/;
+
+// Maximum allowed submissions per hour
+const MAX_CONTACT_ATTEMPTS = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 heure
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,11 +69,50 @@ export async function POST(request: NextRequest) {
       request.headers.get('x-real-ip') ||
       '127.0.0.1';
 
-    // 5. Persist to PostgreSQL Supabase database
+    // 5. Rate limiting defense-in-depth:
+    // Max 5 messages sent per 1-hour window per IP address and per Email address
+    const ipLimit = checkRateLimit(`contact:ip:${ip}`, MAX_CONTACT_ATTEMPTS, RATE_LIMIT_WINDOW_MS);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Limite d'envoi atteinte. Par mesure de sécurité anti-spam, vous êtes limité à un maximum de ${MAX_CONTACT_ATTEMPTS} messages par heure. Veuillez patienter ${Math.ceil(
+            ipLimit.resetInSec / 60
+          )} minute(s) avant de renouveler votre demande.`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(ipLimit.resetInSec),
+          },
+        }
+      );
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const emailLimit = checkRateLimit(`contact:email:${cleanEmail}`, MAX_CONTACT_ATTEMPTS, RATE_LIMIT_WINDOW_MS);
+    if (!emailLimit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Limite d'envoi atteinte pour l'adresse ${cleanEmail}. Par mesure de protection, un maximum de ${MAX_CONTACT_ATTEMPTS} messages par heure est autorisé. Veuillez patienter ${Math.ceil(
+            emailLimit.resetInSec / 60
+          )} minute(s).`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(emailLimit.resetInSec),
+          },
+        }
+      );
+    }
+
+    // 6. Persist to PostgreSQL Supabase database
     const saved = await prisma.contactMessage.create({
       data: {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         phone: phone ? phone.trim() : null,
         company: company ? company.trim() : null,
         subject_type: subject_type || 'commercial',
@@ -79,11 +123,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const remaining = Math.min(ipLimit.remaining, emailLimit.remaining);
+
     return NextResponse.json({
       success: true,
       message:
         'Votre message a été transmis avec succès à l’équipe VCheque. Nous vous répondrons dans les plus brefs délais (sous 24h ouvrées).',
       id: saved.id,
+      remaining,
     });
   } catch (error: any) {
     console.error('Erreur API Contact:', error);

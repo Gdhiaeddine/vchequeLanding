@@ -496,12 +496,11 @@ export default function ContactView() {
 
                   {/* Pied du formulaire */}
                   <div className="contact-form-footer">
-                    {/* Mention légale à gauche */}
+                    {/* Mention légale & sécurité anti-spam à gauche */}
                     <div className="contact-privacy-note">
                       <Lock size={15} aria-hidden="true" />
                       <span>
-                        Données protégées conformément à la <strong>Loi 18-07</strong> relative à
-                        la protection des données personnelles.
+                        Données protégées conformément à la <strong>Loi 18-07</strong>. Protection anti-spam active (max. 5 messages par heure).
                       </span>
                     </div>
 
