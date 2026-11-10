@@ -9,6 +9,7 @@ import licenseManager from '../lib/licensing/license-manager';
 
 describe('Desktop Client License API Endpoints', () => {
   let testKey: string;
+  let testId: number;
 
   beforeAll(async () => {
     const lic = await licenseManager.createLicense(
@@ -21,6 +22,7 @@ describe('Desktop Client License API Endpoints', () => {
       'TEST_SUITE'
     );
     testKey = lic.license_key;
+    testId = lic.id;
   });
 
   afterAll(async () => {
@@ -134,5 +136,17 @@ describe('Desktop Client License API Endpoints', () => {
     expect(json.success).toBe(true);
     expect(json.data.activations.length).toBeGreaterThanOrEqual(1);
     expect(json.data.audit_logs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('GET /api/v1/license/history/[key] resolves by numeric database ID string', async () => {
+    const req = new NextRequest(`http://localhost:3000/api/v1/license/history/${testId}`);
+    const res = await historyRoute(req, { params: Promise.resolve({ key: String(testId) }) });
+    expect(res.status).toBe(200);
+
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data.id).toBe(testId);
+    expect(json.data.license.id).toBe(testId);
+    expect(json.data.license_key).toBe(testKey);
   });
 });

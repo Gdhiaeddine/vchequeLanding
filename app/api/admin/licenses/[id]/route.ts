@@ -4,6 +4,34 @@ import { getSession } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session || !session.is2faVerified) {
+      return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const license = await licenseManager.getHistory(id);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...license,
+        license,
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || 'Licence introuvable' },
+      { status: 404 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

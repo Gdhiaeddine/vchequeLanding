@@ -32,14 +32,21 @@ export default function LicenseDetailPage() {
 
   const fetchLicense = async () => {
     try {
-      const res = await fetch(`/api/v1/license/history/${id}`);
+      let res = await fetch(`/api/admin/licenses/${id}`);
+      if (!res.ok) {
+        res = await fetch(`/api/v1/license/history/${id}`);
+      }
       const data = await res.json();
       if (res.ok && data.success) {
         setLicense(data.data);
-        setNewQuota(data.data.license.max_activations || 1);
+        const lic = data.data.license || data.data;
+        setNewQuota(lic.max_activations || 1);
+      } else {
+        setLicense(null);
       }
     } catch (err) {
       console.error(err);
+      setLicense(null);
     } finally {
       setLoading(false);
     }
@@ -54,7 +61,8 @@ export default function LicenseDetailPage() {
     setMessage(null);
 
     try {
-      const res = await fetch(`/api/admin/licenses/${license.license.id}`, {
+      const targetId = license?.license?.id || license?.id || id;
+      const res = await fetch(`/api/admin/licenses/${targetId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ...extraData }),
@@ -78,7 +86,9 @@ export default function LicenseDetailPage() {
     return <div className="p-12 text-center text-sm text-[#6b7c74]">Chargement des détails de la licence...</div>;
   }
 
-  if (!license || !license.license) {
+  const lic = license?.license || license;
+
+  if (!license || !lic || (!lic.id && !lic.license_key)) {
     return (
       <div className="p-12 text-center">
         <h2 className="text-2xl font-serif text-[#102C25] font-normal tracking-tight">Licence introuvable</h2>
@@ -89,9 +99,8 @@ export default function LicenseDetailPage() {
     );
   }
 
-  const lic = license.license;
-  const activations = license.activations || [];
-  const auditLogs = license.audit_logs || [];
+  const activations = license.activations || lic.activations || [];
+  const auditLogs = license.audit_logs || lic.audit_logs || [];
   const activeCount = activations.filter((a: any) => a.status === 'active').length;
 
   return (

@@ -468,26 +468,34 @@ export class LicenseManager {
   }
 
   /**
-   * Retourne l'historique complet d'une licence.
+   * Retourne l'historique complet d'une licence par ID numérique ou Clé de licence.
    */
   public async getHistory(licenseIdOrKey: number | string) {
-    const license = typeof licenseIdOrKey === 'number'
-      ? await prisma.license.findUnique({
-          where: { id: licenseIdOrKey },
-          include: {
-            activations: { orderBy: { activated_at: 'desc' } },
-            audit_logs: { orderBy: { created_at: 'desc' } },
-            orders: true,
-          },
-        })
-      : await prisma.license.findUnique({
-          where: { license_key: (licenseIdOrKey as string).trim().toUpperCase() },
-          include: {
-            activations: { orderBy: { activated_at: 'desc' } },
-            audit_logs: { orderBy: { created_at: 'desc' } },
-            orders: true,
-          },
-        });
+    const isNum = typeof licenseIdOrKey === 'number' || /^\d+$/.test(String(licenseIdOrKey).trim());
+    const numId = isNum ? parseInt(String(licenseIdOrKey).trim(), 10) : null;
+
+    let license = null;
+    if (numId !== null) {
+      license = await prisma.license.findUnique({
+        where: { id: numId },
+        include: {
+          activations: { orderBy: { activated_at: 'desc' } },
+          audit_logs: { orderBy: { created_at: 'desc' } },
+          orders: true,
+        },
+      });
+    }
+
+    if (!license && typeof licenseIdOrKey === 'string') {
+      license = await prisma.license.findUnique({
+        where: { license_key: licenseIdOrKey.trim().toUpperCase() },
+        include: {
+          activations: { orderBy: { activated_at: 'desc' } },
+          audit_logs: { orderBy: { created_at: 'desc' } },
+          orders: true,
+        },
+      });
+    }
 
     if (!license) throw new Error('Licence introuvable.');
     return license;
