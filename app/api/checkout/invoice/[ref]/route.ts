@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { generateInvoicePdf } from '@/lib/pdf/invoice-generator';
+import { checkRateLimit } from '@/lib/security/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +12,25 @@ export async function GET(
   try {
     const { ref } = await params;
 
-    if (!ref) {
+    if (!ref || typeof ref !== 'string' || ref.trim() === '') {
       return NextResponse.json({ error: 'Référence requise.' }, { status: 400 });
     }
 
+    // 1. Protection anti-énumération et limitation du débit CPU (Rate Limiting)
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      '127.0.0.1';
+
+    const rateLimit = checkRateLimit(`invoice:ip:${ip}`, 20, 15 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Trop de demandes de génération de factures. Veuillez patienter quelques minutes.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.resetInSec) } }
+      );
+    }
+
+    // 2. Recherche de la commande
     const order = await prisma.order.findUnique({
       where: { reference: ref.trim() },
       include: { license: true },
@@ -22,6 +38,17 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json({ error: 'Commande introuvable.' }, { status: 404 });
+    }
+
+    // 3. Contrôle d'intégrité commerciale : facture acquittée réservée aux règlements certifiés
+    if (order.status !== 'completed') {
+      return NextResponse.json(
+        {
+          error:
+            'La facture officielle acquittée est accessible uniquement pour les commandes dont le règlement a été validé.',
+        },
+        { status: 403 }
+      );
     }
 
     let planTitle = 'Licence Commerciale VCheque (Perpétuelle)';

@@ -114,7 +114,8 @@ export async function PUT(
       }
 
       const buffer = Buffer.from(await coverFile.arrayBuffer());
-      const ext = path.extname(coverFile.name) || '.jpg';
+      const rawExt = path.extname(coverFile.name).toLowerCase();
+      const ext = ['.jpg', '.jpeg', '.png', '.webp'].includes(rawExt) ? rawExt : '.jpg';
       const safeName = `${crypto.randomBytes(16).toString('hex')}${ext}`;
       const uploadDir = path.resolve(process.cwd(), 'public/uploads/blog_covers');
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
