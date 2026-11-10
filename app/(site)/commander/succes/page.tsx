@@ -51,16 +51,7 @@ export default async function CheckoutSuccessPage({
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          status: 'completed',
-          paid_at: new Date(),
-          license_key: licenseKey,
-        },
-      });
-
-      await tx.license.create({
+      const createdLicense = await tx.license.create({
         data: {
           license_key: licenseKey!,
           licensee_name: order.nom,
@@ -74,9 +65,18 @@ export default async function CheckoutSuccessPage({
         },
       });
 
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          status: 'completed',
+          paid_at: new Date(),
+          license_key: licenseKey,
+        },
+      });
+
       await tx.licenseAuditLog.create({
         data: {
-          license_id: (await tx.license.findUnique({ where: { license_key: licenseKey! } }))!.id,
+          license_id: createdLicense.id,
           action: 'KEY_GENERATED_ONLINE_ORDER',
           actor: 'CHECKOUT_SYSTEM',
           details: JSON.stringify({ order_reference: order.reference, amount: order.amount }),
