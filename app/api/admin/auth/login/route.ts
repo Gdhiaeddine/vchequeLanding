@@ -2,9 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/auth/session';
+import { checkRateLimit, resetRateLimit } from '@/lib/security/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      '127.0.0.1';
+
+    // Protection anti-brute force : 5 tentatives max par 15 minutes par IP
+    const rateCheck = checkRateLimit(`auth_login:${ip}`, 5, 15 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Trop de tentatives infructueuses. Veuillez patienter ${rateCheck.resetInSec} secondes avant de réessayer.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password, remember = false } = body;
 
@@ -33,6 +51,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Réinitialisation de la limitation après authentification réussie
+    resetRateLimit(`auth_login:${ip}`);
 
     const has2fa = !!user.two_factor_secret && !!user.two_factor_confirmed_at;
 

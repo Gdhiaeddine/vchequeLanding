@@ -468,14 +468,15 @@ export class LicenseManager {
   }
 
   /**
-   * Retourne l'historique complet d'une licence par ID numérique ou Clé de licence.
+   * Retourne l'historique complet d'une licence.
+   * La résolution par ID numérique et l'accès aux commandes (PII) sont strictement réservés à l'administration.
    */
-  public async getHistory(licenseIdOrKey: number | string) {
+  public async getHistory(licenseIdOrKey: number | string, forAdmin = false) {
     const isNum = typeof licenseIdOrKey === 'number' || /^\d+$/.test(String(licenseIdOrKey).trim());
     const numId = isNum ? parseInt(String(licenseIdOrKey).trim(), 10) : null;
 
     let license = null;
-    if (numId !== null) {
+    if (numId !== null && forAdmin) {
       license = await prisma.license.findUnique({
         where: { id: numId },
         include: {
@@ -492,7 +493,7 @@ export class LicenseManager {
         include: {
           activations: { orderBy: { activated_at: 'desc' } },
           audit_logs: { orderBy: { created_at: 'desc' } },
-          orders: true,
+          orders: forAdmin,
         },
       });
     }

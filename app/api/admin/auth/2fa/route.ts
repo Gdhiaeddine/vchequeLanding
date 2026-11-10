@@ -2,12 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSession, createSession } from '@/lib/auth/session';
 import { verifyTotpCode } from '@/lib/auth/totp';
+import { checkRateLimit, resetRateLimit } from '@/lib/security/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
     if (!session) {
       return NextResponse.json({ success: false, error: 'Session expirée. Veuillez vous reconnecter.' }, { status: 401 });
+    }
+
+    // Protection anti-brute force TOTP : 5 essais max par 15 minutes par utilisateur
+    const rateCheck = checkRateLimit(`auth_2fa:${session.userId}`, 5, 15 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Trop de tentatives de code 2FA erronées. Veuillez patienter ${rateCheck.resetInSec} secondes avant de réessayer.`,
+        },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
@@ -51,6 +64,8 @@ export async function POST(request: NextRequest) {
     if (!isValid) {
       return NextResponse.json({ success: false, error: 'Code à deux facteurs incorrect ou expiré.' }, { status: 400 });
     }
+
+    resetRateLimit(`auth_2fa:${session.userId}`);
 
     // Upgrade session to verified
     await createSession({

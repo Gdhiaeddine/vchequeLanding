@@ -15,7 +15,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const license = await licenseManager.getHistory(id);
+    const license = await licenseManager.getHistory(id, true);
 
     return NextResponse.json({
       success: true,

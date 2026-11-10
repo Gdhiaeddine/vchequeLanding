@@ -138,15 +138,17 @@ describe('Desktop Client License API Endpoints', () => {
     expect(json.data.audit_logs.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('GET /api/v1/license/history/[key] resolves by numeric database ID string', async () => {
+  it('GET /api/v1/license/history/[key] prevents IDOR by rejecting unauthenticated numeric ID queries', async () => {
     const req = new NextRequest(`http://localhost:3000/api/v1/license/history/${testId}`);
     const res = await historyRoute(req, { params: Promise.resolve({ key: String(testId) }) });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(404);
 
     const json = await res.json();
-    expect(json.success).toBe(true);
-    expect(json.data.id).toBe(testId);
-    expect(json.data.license.id).toBe(testId);
-    expect(json.data.license_key).toBe(testKey);
+    expect(json.success).toBe(false);
+
+    // Verified that admin mode allows lookup by ID
+    const adminResult = await licenseManager.getHistory(testId, true);
+    expect(adminResult.id).toBe(testId);
+    expect(adminResult.license_key).toBe(testKey);
   });
 });

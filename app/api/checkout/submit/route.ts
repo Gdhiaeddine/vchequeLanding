@@ -12,16 +12,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Nom et email sont obligatoires.' }, { status: 400 });
     }
 
-    // Determine pricing and devices from plan
-    let amount = Number(reqAmount) || 4900;
+    // Tarification serveur stricte (Prévention d'altération de prix / Price Tampering)
+    let amount = 4900;
     let maxActivations = 1;
 
     if (plan === 'duo') {
-      amount = Number(reqAmount) || 8900;
+      amount = 8900;
       maxActivations = 2;
     } else if (plan === 'enterprise') {
-      amount = Number(reqAmount) || 18900;
+      amount = 18900;
       maxActivations = 5;
+    } else {
+      // Formule solo standard (4 900 DZD) ou offre promotionnelle officielle (8 500 DZD)
+      amount = Number(reqAmount) === 8500 ? 8500 : 4900;
+      maxActivations = 1;
     }
 
     // Generate unique order reference: VC-YYYYMMDD-XXXXX

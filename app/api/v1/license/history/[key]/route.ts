@@ -11,7 +11,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Clé non spécifiée' }, { status: 400 });
     }
 
-    const history = await licenseManager.getHistory(key);
+    const history = await licenseManager.getHistory(key, false);
 
     return NextResponse.json({
       success: true,
