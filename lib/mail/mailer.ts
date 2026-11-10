@@ -1,14 +1,21 @@
 import nodemailer from 'nodemailer';
+import { generateInvoicePdf, InvoiceParams } from '@/lib/pdf/invoice-generator';
 
-interface SendLicenseEmailParams {
+export interface SendLicenseEmailParams {
   to: string;
   customerName: string;
   orderRef: string;
   licenseKey: string;
   amount: number;
   company?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  ville?: string | null;
+  wilaya?: string | null;
   planTitle?: string;
   maxActivations?: number;
+  paidAt?: Date | null;
+  transactionId?: string | null;
 }
 
 export class MailerService {
@@ -34,11 +41,12 @@ export class MailerService {
   }
 
   /**
-   * Envoie l'email de confirmation post-achat avec la clé de licence VCheque.
+   * Envoie l'email de confirmation post-achat avec la clé de licence VCheque
+   * et la facture officielle acquittée en pièce jointe PDF.
    */
   public async sendLicenseConfirmationEmail(params: SendLicenseEmailParams): Promise<boolean> {
     if (!this.transporter) {
-      console.warn('MailerService: SMTP credentials not configured, skipping email.');
+      console.warn('MailerService: SMTP credentials not configured, skipping email delivery.');
       return false;
     }
 
@@ -49,21 +57,51 @@ export class MailerService {
       licenseKey,
       amount,
       company,
-      planTitle = 'Licence VCheque Permanente',
+      phone,
+      address,
+      ville,
+      wilaya,
+      planTitle = 'Licence Commerciale VCheque (Perpétuelle)',
       maxActivations = 1,
+      paidAt = new Date(),
+      transactionId,
     } = params;
 
-    const fromAddress = process.env.MAIL_FROM_ADDRESS || 'contact@virtanis.com';
+    const fromAddress = process.env.MAIL_FROM_ADDRESS || 'support@virtanis.dz';
     const fromName = process.env.MAIL_FROM_NAME || 'VCheque par Virtanis';
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vcheque.virtanis.com';
+    const year = new Date().getFullYear();
 
     const formattedAmount = new Intl.NumberFormat('fr-DZ', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
 
-    const subject = `Votre clé de licence VCheque — Commande ${orderRef}`;
+    // 1. Génération de la facture PDF acquittée
+    let pdfBuffer: Buffer | null = null;
+    try {
+      pdfBuffer = await generateInvoicePdf({
+        orderRef,
+        customerName,
+        company,
+        email: to,
+        phone,
+        address,
+        ville,
+        wilaya,
+        amount,
+        licenseKey,
+        paidAt,
+        transactionId,
+        planTitle,
+      });
+    } catch (pdfErr) {
+      console.error('Failed to generate PDF invoice attachment:', pdfErr);
+    }
 
+    const subject = `Confirmation & Facture Acquittée — Licence VCheque (Réf: ${orderRef})`;
+
+    // 2. Gabarit HTML responsive (Luxury Banking & Enterprise Security)
     const htmlContent = `
 <!DOCTYPE html>
 <html lang="fr">
@@ -76,130 +114,175 @@ export class MailerService {
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #F7F4EC; padding: 32px 16px;">
     <tr>
       <td align="center">
-        <!-- Conteneur Principal -->
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; background-color: #FFFFFF; border: 1px solid #E5E0D5; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(16, 44, 37, 0.06);">
+        <!-- Conteneur 600px Max -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #FFFFFF; border: 1px solid #E5DFD3; border-radius: 18px; overflow: hidden; box-shadow: 0 12px 30px rgba(16, 44, 37, 0.07);">
           
-          <!-- En-tête Institutionnel Vert Impérial -->
+          <!-- SECTION A : HEADER BANNER (VERT IMPÉRIAL & OR) -->
           <tr>
-            <td style="background-color: #102C25; padding: 36px 32px; text-align: center; border-bottom: 3px solid #B99A5A;">
-              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #B99A5A;">
-                VIRTANIS ÉDITION LOGICIELLE
-              </p>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 400; font-family: Georgia, 'DM Serif Display', serif; color: #FFFFFF; letter-spacing: -0.01em;">
-                Votre licence VCheque est prête
-              </h1>
-              <p style="margin: 8px 0 0 0; font-size: 13px; color: #F5E8C7; opacity: 0.9;">
-                Règlement validé par carte bancaire CIB / Edahabia
-              </p>
-            </td>
-          </tr>
-
-          <!-- Corps du message -->
-          <tr>
-            <td style="padding: 32px 32px 24px 32px;">
-              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #102C25;">
-                Bonjour <strong>${customerName}</strong>,
-              </p>
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #556660;">
-                Nous vous confirmons la validation de votre règlement pour l'acquisition du logiciel d'impression et d'édition de chèques bancaires <strong>VCheque</strong>. Vous trouverez ci-dessous votre clé d'activation permanente.
-              </p>
-
-              <!-- Cadre Clé de Licence Gold -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 28px 0; background-color: #F7F4EC; border: 2px dashed #B99A5A; border-radius: 14px; text-align: center;">
-                <tr>
-                  <td style="padding: 24px 20px;">
-                    <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #96783C;">
-                      Clé d'Activation Permanente
-                    </p>
-                    <p style="margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 22px; font-weight: 700; color: #102C25; letter-spacing: 0.14em; word-break: break-all;">
-                      ${licenseKey}
-                    </p>
-                    <p style="margin: 8px 0 0 0; font-size: 11px; color: #556660;">
-                      Autorisé pour : ${maxActivations} poste${maxActivations > 1 ? 's' : ''} Windows ${company ? `(${company})` : ''}
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Récapitulatif Commande -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 28px 0; border: 1px solid #EDE8DF; border-radius: 12px; background-color: #FCFAF7;">
-                <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #EDE8DF;">
-                    <span style="font-size: 12px; color: #556660;">Référence Commande :</span>
-                    <strong style="float: right; font-size: 12px; color: #102C25; font-family: monospace;">${orderRef}</strong>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #EDE8DF;">
-                    <span style="font-size: 12px; color: #556660;">Formule :</span>
-                    <strong style="float: right; font-size: 12px; color: #102C25;">${planTitle}</strong>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 16px 20px;">
-                    <span style="font-size: 13px; font-weight: 600; color: #102C25;">Montant Réglé :</span>
-                    <strong style="float: right; font-size: 15px; color: #102C25; font-weight: 700;">${formattedAmount} DZD</strong>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Guide d'activation rapide en 3 étapes -->
-              <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #102C25; text-transform: uppercase; letter-spacing: 0.05em;">
-                Guide de mise en route Windows
-              </h3>
-              
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 28px 0;">
-                <tr>
-                  <td width="32" valign="top" style="padding-bottom: 12px;">
-                    <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background-color: #102C25; color: #B99A5A; font-weight: 700; font-size: 11px;">1</span>
-                  </td>
-                  <td valign="top" style="padding-bottom: 12px; font-size: 13px; line-height: 1.5; color: #102C25;">
-                    <strong>Téléchargez le logiciel :</strong> Récupérez l'installeur officiel VCheque compatible Windows 10 & 11.
-                  </td>
-                </tr>
-                <tr>
-                  <td width="32" valign="top" style="padding-bottom: 12px;">
-                    <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background-color: #102C25; color: #B99A5A; font-weight: 700; font-size: 11px;">2</span>
-                  </td>
-                  <td valign="top" style="padding-bottom: 12px; font-size: 13px; line-height: 1.5; color: #102C25;">
-                    <strong>Installez le programme :</strong> Lancez l'exécutable et suivez l'assistant d'installation sécurisé.
-                  </td>
-                </tr>
-                <tr>
-                  <td width="32" valign="top">
-                    <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background-color: #102C25; color: #B99A5A; font-weight: 700; font-size: 11px;">3</span>
-                  </td>
-                  <td valign="top" style="font-size: 13px; line-height: 1.5; color: #102C25;">
-                    <strong>Activez la licence :</strong> Collez votre clé ci-dessus au premier démarrage pour débloquer l'impression illimitée.
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Bouton Télécharger -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0; text-align: center;">
+            <td style="background-color: #102C25; padding: 32px 25px; text-align: center; border-bottom: 3px solid #B99A5A;">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${appUrl}/telecharger" target="_blank" style="display: inline-block; padding: 14px 32px; background-color: #102C25; color: #FFFFFF; font-size: 13px; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 999px; box-shadow: 0 4px 12px rgba(16, 44, 37, 0.2);">
-                      Télécharger VCheque pour Windows
-                    </a>
+                    <span style="font-size: 26px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.02em;">
+                      <span style="color: #FFFFFF;">V</span><span style="color: #B99A5A;">Cheque</span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 8px;">
+                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #E5DFD3;">
+                      IMPRESSION &amp; GESTION DE CHÈQUES BANCAIRES
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CORPS PRINCIPAL DE L'EMAIL -->
+          <tr>
+            <td style="padding: 32px 28px 24px 28px;">
+
+              <!-- SECTION B : SALUTATION & REMERCIEMENT -->
+              <h2 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #102C25; letter-spacing: -0.01em;">
+                Bonjour ${customerName},
+              </h2>
+
+              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #556660;">
+                Nous vous confirmons avec plaisir le règlement de <strong style="color: #102C25;">${formattedAmount} DZD</strong> effectué avec succès par carte bancaire (CIB / Edahabia). Votre licence commerciale permanente pour <strong>${maxActivations} poste Windows</strong> est désormais activée et prête à l'emploi.
+              </p>
+
+              <!-- SECTION C : BOÎTE MAÎTRESSE - CLÉ D'ACTIVATION COMMERCIALE -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 28px 0; background-color: #F7F4EC; border: 2px dashed #B99A5A; border-radius: 12px; text-align: center;">
+                <tr>
+                  <td style="padding: 22px 18px;">
+                    <p style="margin: 0 0 10px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #7A5F2E;">
+                      VOTRE CLÉ D&apos;ACTIVATION COMMERCIALE
+                    </p>
+
+                    <!-- Boîte intérieure blanche pour la clé -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #FFFFFF; border: 1px solid #E5DFD3; border-radius: 8px; margin: 0 0 10px 0;">
+                      <tr>
+                        <td style="padding: 14px 12px; text-align: center;">
+                          <span style="font-family: 'Courier New', Courier, monospace; font-size: 20px; font-weight: 700; color: #102C25; letter-spacing: 2px; word-break: break-all;">
+                            ${licenseKey}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin: 0; font-size: 11.5px; color: #556660;">
+                      Réf. Commande : <strong style="color: #102C25; font-family: monospace;">${orderRef}</strong> • Licence Perpétuelle (${maxActivations} PC)
+                    </p>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #556660; text-align: center;">
-                Besoin d'aide ? Notre support technique est à votre disposition par retour de cet email.
-              </p>
+              <!-- SECTION D : GUIDE DE PRISE EN MAIN EN 3 ÉTAPES NUMÉROTÉES -->
+              <h3 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #102C25;">
+                Guide de mise en route en 3 étapes
+              </h3>
+
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 26px 0;">
+                <!-- ÉTAPE 1 -->
+                <tr>
+                  <td width="36" valign="top" style="padding-bottom: 18px;">
+                    <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; background-color: #102C25; color: #FFFFFF; font-weight: 700; font-size: 12px;">
+                      1
+                    </span>
+                  </td>
+                  <td valign="top" style="padding-bottom: 18px;">
+                    <p style="margin: 0 0 8px 0; font-size: 13.5px; font-weight: 700; color: #102C25;">
+                      Télécharger VCheque pour Windows
+                    </p>
+                    <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>
+                          <a href="${appUrl}/telecharger/fichier" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #102C25; color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; border-radius: 6px; border-left: 3px solid #B99A5A;">
+                            Télécharger VCheque (.exe)
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- ÉTAPE 2 -->
+                <tr>
+                  <td width="36" valign="top" style="padding-bottom: 18px;">
+                    <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; background-color: #102C25; color: #FFFFFF; font-weight: 700; font-size: 12px;">
+                      2
+                    </span>
+                  </td>
+                  <td valign="top" style="padding-bottom: 18px;">
+                    <p style="margin: 0 0 4px 0; font-size: 13.5px; font-weight: 700; color: #102C25;">
+                      Installer le logiciel sur votre poste de travail
+                    </p>
+                    <p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #556660;">
+                      Exécutez le fichier d'installation sur le PC Windows dédié à la rédaction et l'impression de chèques.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- ÉTAPE 3 -->
+                <tr>
+                  <td width="36" valign="top">
+                    <span style="display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; background-color: #B99A5A; color: #102C25; font-weight: 800; font-size: 12px;">
+                      3
+                    </span>
+                  </td>
+                  <td valign="top">
+                    <p style="margin: 0 0 4px 0; font-size: 13.5px; font-weight: 700; color: #102C25;">
+                      Activer votre licence
+                    </p>
+                    <p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #556660;">
+                      Saisissez votre clé d'activation à l'ouverture. La validation s'effectue instantanément hors-ligne par signature Ed25519.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- SECTION E : ENCART D'ANNONCE DE LA FACTURE PDF JOINTE -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0; background-color: #F1F8F4; border-left: 4px solid #137333; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #102C25;">
+                      Facture Officielle en Pièce Jointe (PDF)
+                    </p>
+                    <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #2D5A43;">
+                      Votre facture acquittée <strong>Facture-${orderRef}.pdf</strong> est attachée à ce message pour votre service comptable. Vous pouvez également la <a href="${appUrl}/api/checkout/invoice/${orderRef}" style="color: #137333; font-weight: 700; text-decoration: underline;">télécharger directement ici</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- SECTION F : SUPPORT -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top: 1px solid #E5DFD3; padding-top: 18px; margin-top: 8px;">
+                <tr>
+                  <td style="text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 12px; color: #556660;">
+                      Besoin d'un accompagnement technique ou d'un devis multi-postes ?
+                    </p>
+                    <p style="margin: 0; font-size: 12px;">
+                      <a href="mailto:support@virtanis.dz" style="color: #7A5F2E; font-weight: 700; text-decoration: none;">support@virtanis.dz</a>
+                      <span style="color: #B99A5A; margin: 0 8px;">•</span>
+                      <a href="https://virtanis.net" target="_blank" style="color: #102C25; font-weight: 700; text-decoration: none;">virtanis.net</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
             </td>
           </tr>
 
-          <!-- Footer Signature -->
+          <!-- SECTION F (SUITE) : FOOTER LÉGAL -->
           <tr>
-            <td style="background-color: #F7F4EC; padding: 20px 32px; text-align: center; border-top: 1px solid #E5E0D5; font-size: 11px; color: #556660;">
+            <td style="background-color: #F7F4EC; padding: 22px 25px; text-align: center; border-top: 1px solid #E5DFD3; font-size: 11px; line-height: 1.6; color: #7A8B84;">
               <p style="margin: 0 0 4px 0;">
-                © ${new Date().getFullYear()} Virtanis SARL. Tous droits réservés.
+                © ${year} <strong>Virtanis Technologies</strong> — Tous droits réservés.
               </p>
               <p style="margin: 0;">
-                Solution certifiée pour les banques et entreprises en Algérie.
+                Éditeur de VCheque • Conforme aux lois algériennes 18-05 &amp; 18-07
               </p>
             </td>
           </tr>
@@ -210,29 +293,47 @@ export class MailerService {
   </table>
 </body>
 </html>
-    `;
+    `.trim();
 
+    // 3. Fallback texte brut
     const textContent = `
 Bonjour ${customerName},
 
-Merci pour votre commande sur VCheque (Réf: ${orderRef}).
-Votre règlement de ${formattedAmount} DZD a été validé avec succès.
+Merci pour votre acquisition de VCheque (Réf: ${orderRef}).
+Votre règlement de ${formattedAmount} DZD par carte bancaire (CIB / Edahabia) a été validé avec succès.
 
-VOTRE CLÉ D'ACTIVATION PERMANENTE :
+============================================================
+VOTRE CLÉ D'ACTIVATION COMMERCIALE :
 ${licenseKey}
-
-Autorisé pour : ${maxActivations} poste(s) Windows ${company ? `(${company})` : ''}
+============================================================
+Réf. Commande : ${orderRef} • Licence Perpétuelle (${maxActivations} PC)
 
 GUIDE DE MISE EN ROUTE :
-1. Téléchargez le logiciel : ${appUrl}/telecharger
-2. Installez le programme sous Windows.
-3. Collez votre clé ci-dessus au premier lancement.
+1. Téléchargez VCheque : ${appUrl}/telecharger/fichier
+2. Installez le logiciel sur le PC dédié à l'impression de chèques.
+3. Activez votre licence à l'ouverture (signature Ed25519 hors-ligne).
 
-Une question ? Notre équipe d'assistance reste à votre écoute par retour de cet email.
+FACTURE OFFICIELLE ACQUITTÉE :
+Votre facture Facture-${orderRef}.pdf est jointe à ce message.
+Lien direct de téléchargement : ${appUrl}/api/checkout/invoice/${orderRef}
 
-L'équipe VCheque par Virtanis
-https://vcheque.virtanis.com
+ASSISTANCE TECHNIQUE :
+Email : support@virtanis.dz
+Web : https://virtanis.net
+
+© ${year} Virtanis Technologies — Tous droits réservés.
+Éditeur de VCheque • Conforme aux lois algériennes 18-05 & 18-07
     `.trim();
+
+    // 4. Préparation des pièces jointes
+    const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
+    if (pdfBuffer) {
+      attachments.push({
+        filename: `Facture-${orderRef}.pdf`,
+        content: pdfBuffer,
+        contentType: 'application/pdf',
+      });
+    }
 
     try {
       const info = await this.transporter.sendMail({
@@ -241,9 +342,12 @@ https://vcheque.virtanis.com
         subject,
         text: textContent,
         html: htmlContent,
+        attachments,
       });
 
-      console.log(`License email sent to ${to} for order ${orderRef}. MessageId: ${info.messageId}`);
+      console.log(
+        `License email + PDF invoice sent to ${to} for order ${orderRef}. MessageId: ${info.messageId}`
+      );
       return true;
     } catch (err: any) {
       console.error(`Failed to send license email to ${to}:`, err);

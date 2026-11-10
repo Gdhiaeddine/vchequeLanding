@@ -104,7 +104,7 @@ export default async function CheckoutSuccessPage({
     // 4. Génération atomique de la licence une fois le paiement authentifié
     licenseKey = LicenseManager.generateKey();
     let maxActivations = 1;
-    let planTitle = 'Licence VCheque Permanente';
+    let planTitle = 'Licence Commerciale VCheque (Perpétuelle)';
 
     if (order.metadata) {
       try {
@@ -112,10 +112,12 @@ export default async function CheckoutSuccessPage({
         if (meta.maxActivations && typeof meta.maxActivations === 'number') {
           maxActivations = meta.maxActivations;
         }
-        if (meta.plan === 'duo') planTitle = 'Licence VCheque Duo (2 Postes)';
-        if (meta.plan === 'enterprise') planTitle = 'Licence VCheque Entreprise (5 Postes)';
+        if (meta.plan === 'duo') planTitle = 'Licence Commerciale VCheque Duo (2 Postes)';
+        if (meta.plan === 'enterprise') planTitle = 'Licence Commerciale VCheque Entreprise (5 Postes)';
       } catch {}
     }
+
+    const paidDate = new Date();
 
     await prisma.$transaction(async (tx) => {
       // 1. Création de la licence (satisfait la clé étrangère orders_license_key_fkey)
@@ -138,7 +140,7 @@ export default async function CheckoutSuccessPage({
         where: { id: order.id },
         data: {
           status: 'completed',
-          paid_at: new Date(),
+          paid_at: paidDate,
           license_key: licenseKey,
         },
       });
@@ -159,7 +161,7 @@ export default async function CheckoutSuccessPage({
       });
     });
 
-    // 5. Expédition automatique de l'email de confirmation avec la clé de licence
+    // 5. Expédition automatique de l'email de confirmation avec la clé de licence ET la facture PDF acquittée
     await mailerService.sendLicenseConfirmationEmail({
       to: order.email,
       customerName: order.nom,
@@ -167,8 +169,14 @@ export default async function CheckoutSuccessPage({
       licenseKey: licenseKey!,
       amount: order.amount,
       company: order.entreprise,
+      phone: order.telephone,
+      address: order.adresse,
+      ville: order.ville,
+      wilaya: order.wilaya,
       planTitle,
       maxActivations,
+      paidAt: paidDate,
+      transactionId: order.slickpay_invoice_id,
     });
   }
 
@@ -233,18 +241,28 @@ export default async function CheckoutSuccessPage({
               <CopyButton text={licenseKey!} />
             </div>
 
-            {/* Information email */}
+            {/* Information email & Facture PDF */}
             <p className="success-email-notice">
-              Un email de confirmation contenant votre clé et votre reçu a également été envoyé à{' '}
-              <strong>{order.email}</strong>.
+              Un email de confirmation contenant votre clé et votre facture officielle PDF acquittée
+              a été envoyé à <strong>{order.email}</strong>.
             </p>
           </article>
 
           {/* CARTE 2 : DÉTAILS DE LA TRANSACTION */}
           <article className="success-card" aria-labelledby="details-title">
-            <h3 id="details-title" className="success-section-title">
-              Détails de la transaction
-            </h3>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 id="details-title" className="success-section-title mb-0">
+                Détails de la transaction
+              </h3>
+              <a
+                href={`/api/checkout/invoice/${encodeURIComponent(order.reference)}`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#102C25] hover:text-[#B99A5A] transition-colors"
+                title="Télécharger la facture PDF acquittée"
+              >
+                <FileText size={15} className="text-[#B99A5A]" />
+                <span>Télécharger la Facture PDF</span>
+              </a>
+            </div>
 
             <dl className="success-summary-list">
               {/* Référence commande */}
@@ -352,12 +370,20 @@ export default async function CheckoutSuccessPage({
                 <span>Télécharger pour Windows</span>
               </a>
 
+              <a
+                href={`/api/checkout/invoice/${encodeURIComponent(order.reference)}`}
+                className="btn-back-secondary !bg-white !border-[#B99A5A] !text-[#102C25] hover:!bg-[#F7F4EC]"
+              >
+                <FileText size={16} className="text-[#B99A5A]" aria-hidden="true" />
+                <span>Facture PDF acquittée</span>
+              </a>
+
               <Link
                 href="/"
                 className="btn-back-secondary"
               >
                 <ArrowLeft size={16} aria-hidden="true" />
-                <span>Retour au site principal</span>
+                <span>Retour à l&apos;accueil</span>
               </Link>
             </div>
           </article>

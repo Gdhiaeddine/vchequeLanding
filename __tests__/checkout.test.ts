@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { POST as submitCheckout } from '../app/api/checkout/submit/route';
 import slickPayService from '../lib/payments/slickpay';
 import mailerService from '../lib/mail/mailer';
+import { generateInvoicePdf } from '../lib/pdf/invoice-generator';
 
 describe('Checkout & Order Flow', () => {
   let createdRef: string;
@@ -77,5 +78,29 @@ describe('Checkout & Order Flow', () => {
   it('ensures mailer service is configured and handles email delivery interface', () => {
     expect(mailerService).toBeDefined();
     expect(typeof mailerService.sendLicenseConfirmationEmail).toBe('function');
+  });
+
+  it('generates a valid high-fidelity vector PDF invoice with %PDF- header', async () => {
+    const pdf = await generateInvoicePdf({
+      orderRef: 'VC-20261110-TEST1',
+      customerName: 'Samir Benali',
+      company: 'SARL Atlas Distribution',
+      email: 'samir.benali@atlas.dz',
+      phone: '0550 12 34 56',
+      address: 'Zone Industrielle Oued Smar',
+      ville: 'Alger',
+      wilaya: '16 - Alger',
+      amount: 8500,
+      licenseKey: 'VC-TEST-KEY1-9999',
+      transactionId: 'SATIM-12345678',
+    });
+
+    expect(pdf).toBeDefined();
+    expect(Buffer.isBuffer(pdf)).toBe(true);
+    expect(pdf.length).toBeGreaterThan(1000);
+
+    // Verify valid PDF magic header (%PDF-)
+    const header = pdf.subarray(0, 5).toString('ascii');
+    expect(header).toBe('%PDF-');
   });
 });
