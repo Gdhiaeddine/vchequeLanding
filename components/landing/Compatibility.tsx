@@ -2,22 +2,23 @@ import React from 'react';
 
 export default function Compatibility() {
   const banks = [
-    { code: 'BNA', name: 'Banque Nationale d’Algérie' },
-    { code: 'BEA', name: 'Banque Extérieure d’Algérie' },
-    { code: 'CPA', name: 'Crédit Populaire d’Algérie' },
-    { code: 'BADR', name: 'Banque de l’Agriculture & du Dév. Rural' },
-    { code: 'BDL', name: 'Banque de Développement Local' },
-    { code: 'CNEP', name: 'CNEP Banque' },
-    { code: 'AL BARAKA', name: 'Banque Al Baraka d’Algérie' },
-    { code: 'SGA', name: 'Société Générale Algérie' },
-    { code: 'BNP', name: 'BNP Paribas El Djazaïr' },
-    { code: 'AGB', name: 'Gulf Bank Algeria' },
-    { code: 'FRANSABANK', name: 'Fransabank El Djazaïr' },
-    { code: 'NATIXIS', name: 'Natixis Algérie' },
-    { code: 'ABC', name: 'Arab Banking Corporation' },
-    { code: 'HOUSING', name: 'Housing Bank Algeria' },
-    { code: 'TRUST', name: 'Trust Bank Algeria' },
-    { code: 'ALSALAM', name: 'Al Salam Bank Algeria' },
+    { code: 'BNA', name: 'Banque Nationale d’Algérie', logo: '/assets/bna-logo.webp' },
+    { code: 'BEA', name: 'Banque Extérieure d’Algérie', logo: '/assets/bea-logo.webp' },
+    { code: 'CPA', name: 'Crédit Populaire d’Algérie', logo: '/assets/cpa-logo.webp' },
+    { code: 'BADR', name: 'Banque de l’Agriculture & du Dév. Rural', logo: '/assets/badr-logo.webp' },
+    { code: 'BDL', name: 'Banque de Développement Local', logo: '/assets/bdl-logo.webp' },
+    { code: 'CNEP', name: 'CNEP Banque', logo: '/assets/cnep-logo.webp' },
+    { code: 'AL BARAKA', name: 'Banque Al Baraka d’Algérie', logo: '/assets/albaraka-logo.webp' },
+    { code: 'SGA', name: 'Société Générale Algérie', logo: '/assets/sga-logo.webp' },
+    { code: 'BNP', name: 'BNP Paribas El Djazaïr', logo: '/assets/bnp-logo.webp' },
+    { code: 'AGB', name: 'Gulf Bank Algeria', logo: '/assets/agb-logo.webp' },
+    { code: 'FRANSABANK', name: 'Fransabank El Djazaïr', logo: '/assets/fransa-bank-logo.webp' },
+    { code: 'NATIXIS', name: 'Natixis Algérie', logo: '/assets/natixis-logo.webp' },
+    { code: 'ABC', name: 'Arab Banking Corporation (Bank ABC)', logo: '/assets/abc-logo.webp' },
+    { code: 'HOUSING', name: 'Housing Bank Algeria', logo: '/assets/housing-bank.webp' },
+    { code: 'TRUST', name: 'Trust Bank Algeria', logo: '/assets/trust-logo.webp' },
+    { code: 'ALSALAM', name: 'Al Salam Bank Algeria', logo: '/assets/salam-logo.webp' },
+    { code: 'CCP', name: 'Algérie Poste (Chèques Postaux)', logo: '/assets/ccp-logo.webp' },
   ];
 
   // Duplication de la liste pour assurer un défilement infini sans coupure
@@ -40,29 +41,25 @@ export default function Compatibility() {
         </div>
       </div>
 
-      {/* Bande défilante continue sur une seule ligne (marquee allant vers la gauche) */}
+      {/* Bande défilante continue sans rectangle de fond */}
       <div className="marquee-wrapper" aria-label="Liste des banques algériennes compatibles">
         <div className="marquee-track">
           {marqueeList.map((b, idx) => (
-            <div key={`${b.code}-${idx}`} className="bank-card">
-              <span className="bank-badge" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 10 4.5 4h15L21 10" />
-                  <path d="M5 10v9h14v-9" />
-                  <path d="M9.5 19v-5h5v5" />
-                </svg>
-              </span>
-              <div className="bank-info">
-                <span className="bank-code">{b.code}</span>
-                <span className="bank-name">{b.name}</span>
-              </div>
+            <div
+              key={`${b.code}-${idx}`}
+              className="bank-logo-item"
+              title={`${b.name} (${b.code})`}
+              aria-label={`${b.name} (${b.code})`}
+            >
+              <img
+                src={b.logo}
+                alt={`${b.name} (${b.code})`}
+                className="bank-logo-img"
+                loading="lazy"
+                decoding="async"
+                width={120}
+                height={50}
+              />
             </div>
           ))}
         </div>
