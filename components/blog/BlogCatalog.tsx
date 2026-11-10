@@ -27,6 +27,7 @@ export interface BlogPostItem {
   views_count: number;
   published_at: string | null;
   created_at: string | null;
+  updated_at?: string | null;
 }
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -250,7 +251,7 @@ export default function BlogCatalog({ initialPosts }: { initialPosts: BlogPostIt
             <div className="featured-media-col">
               {featuredPost.cover_image_path ? (
                 <Image
-                  src={`/api/blog/cover/${featuredPost.id}`}
+                  src={`/api/blog/cover/${featuredPost.id}?v=${featuredPost.updated_at ? new Date(featuredPost.updated_at).getTime() : featuredPost.id}`}
                   alt={featuredPost.title}
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
@@ -316,7 +317,7 @@ export default function BlogCatalog({ initialPosts }: { initialPosts: BlogPostIt
                 <div className="article-media">
                   {post.cover_image_path ? (
                     <Image
-                      src={`/api/blog/cover/${post.id}`}
+                      src={`/api/blog/cover/${post.id}?v=${post.updated_at ? new Date(post.updated_at).getTime() : post.id}`}
                       alt={post.title}
                       fill
                       unoptimized

@@ -33,6 +33,20 @@ export async function GET(
     return NextResponse.json({ error: 'Fichier physique introuvable' }, { status: 404 });
   }
 
+  const stat = fs.statSync(filePath);
+  const etag = `"${stat.size.toString(16)}-${stat.mtimeMs.toString(16)}"`;
+
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    return new NextResponse(null, {
+      status: 304,
+      headers: {
+        ETag: etag,
+        'Cache-Control': 'public, max-age=60, must-revalidate',
+      },
+    });
+  }
+
   const fileBuffer = fs.readFileSync(filePath);
   const ext = path.extname(filePath).toLowerCase();
   const mime =
@@ -43,7 +57,9 @@ export async function GET(
     headers: {
       'Content-Type': mime,
       'Content-Length': fileBuffer.length.toString(),
-      'Cache-Control': 'public, max-age=86400, immutable',
+      ETag: etag,
+      'Last-Modified': stat.mtime.toUTCString(),
+      'Cache-Control': 'public, max-age=60, must-revalidate',
     },
   });
 }

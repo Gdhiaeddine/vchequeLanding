@@ -278,7 +278,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <figure className="article-cover-wrapper">
           {post.cover_image_path ? (
             <Image
-              src={`/api/blog/cover/${post.id}`}
+              src={`/api/blog/cover/${post.id}?v=${post.updated_at ? new Date(post.updated_at).getTime() : post.id}`}
               alt={post.title}
               fill
               priority
@@ -387,7 +387,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <div className="article-media">
                     {related.cover_image_path ? (
                       <Image
-                        src={`/api/blog/cover/${related.id}`}
+                        src={`/api/blog/cover/${related.id}?v=${related.updated_at ? new Date(related.updated_at).getTime() : related.id}`}
                         alt={related.title}
                         fill
                         unoptimized

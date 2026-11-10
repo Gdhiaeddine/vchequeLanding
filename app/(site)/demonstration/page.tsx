@@ -1,117 +1,343 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
-import { Play, Download, ShoppingCart, CheckCircle } from 'lucide-react';
+import {
+  Play,
+  ShieldCheck,
+  Printer,
+  Calendar,
+  Eye,
+  ShoppingCart,
+  MessageSquare,
+  Sparkles,
+  Layers,
+  Sliders,
+  CheckCircle2,
+  Video,
+} from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Démonstration Vidéo VCheque — Découvrez le Logiciel en Action en Algérie',
+  description:
+    'Regardez comment remplir, convertir en toutes lettres et imprimer un chèque bancaire professionnel en moins de 3 minutes sur n’importe quelle imprimante de bureau.',
+  keywords: [
+    'démonstration VCheque',
+    'vidéo impression chèque Algérie',
+    'tutoriel chèque bancaire Algérie',
+    'logiciel chèque BNA CPA BEA BADR',
+    'conversion chiffres en lettres DZD',
+  ],
+  openGraph: {
+    title: 'Démonstration VCheque : Découvrez le Logiciel d’Impression de Chèques en Action',
+    description:
+      'Tutoriel vidéo complet : remplissage, conversion instantanée et impression millimétrique sur chèques bancaires algériens.',
+    url: 'https://vcheque.com/demonstration',
+    siteName: 'VCheque par Virtanis',
+    locale: 'fr_DZ',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Démonstration Vidéo VCheque',
+    description:
+      'Découvrez comment sécuriser et imprimer vos chèques bancaires algériens avec VCheque.',
+  },
+  alternates: {
+    canonical: 'https://vcheque.com/demonstration',
+  },
+};
 
 export default async function DemonstrationPage() {
   const activeVideo = await prisma.demoVideo.findFirst({
     where: { is_active: true },
+    orderBy: { created_at: 'desc' },
   });
 
-  return (
-    <div className="py-16 bg-[#fdfbf7]">
-      <div className="container max-w-5xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#b99a5a] mb-2">
-            Aperçu en action
-          </p>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#122620] font-serif mb-4">
-            Démonstration du logiciel VCheque
-          </h1>
-          <p className="text-[#4f5f58] text-base leading-relaxed">
-            Découvrez en quelques minutes comment remplir vos chèques professionnels, aligner vos impressions et convertir automatiquement vos montants sans ratures.
-          </p>
-        </div>
+  const formattedDate = activeVideo?.created_at
+    ? new Intl.DateTimeFormat('fr-DZ', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }).format(new Date(activeVideo.created_at))
+    : null;
 
-        {/* Video Frame */}
-        <div className="rounded-2xl bg-white border border-[#e2dcce] shadow-xl overflow-hidden p-3 mb-12">
-          {activeVideo ? (
-            <video
-              controls
-              className="w-full aspect-video rounded-xl bg-black"
-              poster={activeVideo.thumbnail_path || undefined}
-            >
-              <source src={`/api/demonstration/video/${activeVideo.id}`} type={activeVideo.mime_type} />
-              Votre navigateur ne prend pas en charge la lecture de vidéos.
-            </video>
-          ) : (
-            <div className="w-full aspect-video rounded-xl bg-[#122620] flex flex-col items-center justify-center text-center p-8 text-white">
-              <div className="w-16 h-16 rounded-full bg-[#b99a5a]/20 border border-[#b99a5a] flex items-center justify-center mb-4">
-                <Play size={28} className="text-[#b99a5a] ml-1 fill-current" />
+  // Structured Data (JSON-LD)
+  const jsonLd = activeVideo
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: activeVideo.title,
+        description:
+          activeVideo.description ||
+          'Démonstration pratique du logiciel d’impression et d’édition de chèques bancaires VCheque pour l’Algérie.',
+        thumbnailUrl: activeVideo.thumbnail_path
+          ? [activeVideo.thumbnail_path]
+          : ['https://vcheque.com/images/demo-placeholder.jpg'],
+        uploadDate: activeVideo.created_at
+          ? new Date(activeVideo.created_at).toISOString()
+          : new Date().toISOString(),
+        contentUrl: `https://vcheque.com/api/demonstration/video/${activeVideo.id}`,
+        embedUrl: `https://vcheque.com/demonstration`,
+        interactionStatistic: {
+          '@type': 'InteractionCounter',
+          interactionType: { '@type': 'WatchAction' },
+          userInteractionCount: activeVideo.views_count,
+        },
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Démonstration Officielle VCheque',
+        description:
+          'Présentation interactive et démonstration des fonctionnalités du logiciel d’impression de chèques VCheque.',
+        url: 'https://vcheque.com/demonstration',
+      };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* 1. HERO HEADER DÉMONSTRATION */}
+      <header className="demo-hero" aria-labelledby="demo-heading">
+        <div className="demo-hero-grid-mesh" aria-hidden="true" />
+        <div className="demo-hero-glow" aria-hidden="true" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
+          {/* Eyebrow simple */}
+          <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#B99A5A] mb-3">
+            PRÉSENTATION VIDÉO OFFICIELLE
+          </p>
+
+          {/* Grand Titre H1 */}
+          <h1 id="demo-heading" className="demo-hero-title">
+            Démonstration de VCheque : Découvrez le Logiciel en Action
+          </h1>
+
+          {/* Lede / Sous-titre */}
+          <p className="demo-hero-lede">
+            Regardez comment remplir, convertir et imprimer un chèque bancaire professionnel en
+            moins de 3 minutes sur n&apos;importe quelle imprimante de bureau.
+          </p>
+
+          {/* Trio de badges de confiance */}
+          <div className="demo-hero-badges" role="list" aria-label="Points forts de la démonstration">
+            <div className="demo-hero-badge" role="listitem">
+              <Video size={16} aria-hidden="true" />
+              <span>
+                <strong>Démonstration Pratique</strong>
+              </span>
+            </div>
+
+            <div className="demo-hero-badge" role="listitem">
+              <ShieldCheck size={16} aria-hidden="true" />
+              <span>
+                <strong>Banques Algériennes Intégrées</strong>
+              </span>
+            </div>
+
+            <div className="demo-hero-badge" role="listitem">
+              <Printer size={16} aria-hidden="true" />
+              <span>
+                <strong>Impression Millimétrique</strong>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. CONTENEUR PRINCIPAL */}
+      <main className="demo-content-section">
+        <div className="demo-container">
+          {/* CADRE CINÉMA LECTEUR VIDÉO */}
+          <section className="demo-video-container" aria-label="Lecteur vidéo de démonstration">
+            {activeVideo ? (
+              /* CAS 1 : VIDÉO DISPONIBLE & DÉPLOYÉE */
+              <div>
+                <div className="demo-player-box">
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={activeVideo.thumbnail_path || undefined}
+                    aria-label={activeVideo.title}
+                  >
+                    <source
+                      src={`/api/demonstration/video/${activeVideo.id}`}
+                      type={activeVideo.mime_type || 'video/mp4'}
+                    />
+                    <track kind="captions" />
+                    Votre navigateur ne prend pas en charge la lecture de vidéos HTML5.
+                  </video>
+                </div>
+
+                {/* Barre d'informations sous la vidéo */}
+                <div className="demo-video-info">
+                  <div className="demo-video-info-header">
+                    <div>
+                      <span className="demo-video-tag">VIDÉO OFFICIELLE</span>
+                      <h2 className="demo-video-title">{activeVideo.title}</h2>
+                    </div>
+
+                    <div className="demo-video-meta">
+                      {formattedDate && (
+                        <div className="demo-video-meta-item">
+                          <Calendar size={15} aria-hidden="true" />
+                          <span>Publiée le {formattedDate}</span>
+                        </div>
+                      )}
+                      <div className="demo-video-meta-item">
+                        <Eye size={15} aria-hidden="true" />
+                        <span>{activeVideo.views_count.toLocaleString('fr-FR')} visionnages</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {activeVideo.description && (
+                    <p className="demo-video-desc">{activeVideo.description}</p>
+                  )}
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">Vidéo de présentation interactive</h3>
-              <p className="text-[#c5cdc8] text-sm max-w-md mb-6">
-                Le tutoriel pas-à-pas présente la configuration de l'imprimante, la sélection du chéquier de votre banque et l'impression en temps réel.
+            ) : (
+              /* CAS 2 : PLACEHOLDER D'ATTENTE (SI AUCUNE VIDÉO TÉLÉVERSÉE) */
+              <div className="demo-placeholder-box">
+                {/* Bouton Play central animé avec onde pulsante */}
+                <div className="placeholder-icon-wrap" aria-hidden="true">
+                  <div className="placeholder-pulse-ring" />
+                  <div className="placeholder-play-circle">
+                    <Play size={30} />
+                  </div>
+                </div>
+
+                <h2 className="placeholder-title">
+                  Vidéo de démonstration en cours de déploiement
+                </h2>
+
+                <p className="placeholder-text">
+                  L&apos;équipe technique prépare actuellement la vidéo officielle de présentation de la
+                  version Windows. Elle sera disponible ici très prochainement.
+                </p>
+
+                {/* Boutons d'action immédiats */}
+                <div className="placeholder-actions">
+                  <Link
+                    href="/commander"
+                    className="btn-cta-primary"
+                  >
+                    <ShoppingCart size={16} aria-hidden="true" />
+                    <span>Acheter maintenant</span>
+                  </Link>
+
+                  <Link
+                    href="/contact"
+                    className="btn-cta-secondary !text-[#102C25] !bg-white !border-[#E5E0D5] hover:!border-[#B99A5A]"
+                  >
+                    <MessageSquare size={16} aria-hidden="true" />
+                    <span>Nous contacter</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 3. CARTE DES 4 FONCTIONNALITÉS DÉMONTRÉES */}
+          <section className="demo-features-card" aria-labelledby="features-heading">
+            <div className="demo-features-header">
+              <span className="demo-features-tag">PILIER FONCTIONNELS</span>
+              <h2 id="features-heading" className="demo-features-title">
+                Ce que vous découvrez dans cette démonstration
+              </h2>
+              <p className="demo-features-subtitle">
+                VCheque a été spécialement conçu pour répondre aux contraintes du système bancaire et
+                comptable en Algérie.
               </p>
-              <Link
-                href="/telecharger"
-                className="btn btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold"
-              >
-                <Download size={16} />
-                <span>Télécharger la version d'essai</span>
+            </div>
+
+            <div className="features-grid">
+              {/* Étape 1 */}
+              <article className="feature-box">
+                <span className="feature-number" aria-hidden="true">
+                  01
+                </span>
+                <h3 className="feature-title">Conversion instantanée en lettres</h3>
+                <p className="feature-desc">
+                  Saisie simple en chiffres (ex: <em>350 000 DZD</em>), retranscription instantanée en
+                  toutes lettres françaises conformément aux exigences bancaires algériennes sans
+                  risque d&apos;erreur.
+                </p>
+              </article>
+
+              {/* Étape 2 */}
+              <article className="feature-box">
+                <span className="feature-number" aria-hidden="true">
+                  02
+                </span>
+                <h3 className="feature-title">Gabarits de toutes les banques</h3>
+                <p className="feature-desc">
+                  Sélection en 1 clic de votre banque (BNA, BEA, CPA, BADR, BDL, Al Baraka, Société
+                  Générale, etc.) avec formats et coordonnées pré-configurés au millimètre près.
+                </p>
+              </article>
+
+              {/* Étape 3 */}
+              <article className="feature-box">
+                <span className="feature-number" aria-hidden="true">
+                  03
+                </span>
+                <h3 className="feature-title">Calibrage d&apos;impression au millimètre</h3>
+                <p className="feature-desc">
+                  Utilisation de la mire de calibrage interactive pour aligner les champs au
+                  millimètre près sur tout bac d&apos;imprimante de bureau (laser ou jet d&apos;encre).
+                </p>
+              </article>
+
+              {/* Étape 4 */}
+              <article className="feature-box">
+                <span className="feature-number" aria-hidden="true">
+                  04
+                </span>
+                <h3 className="feature-title">Barrement & Sécurisation</h3>
+                <p className="feature-desc">
+                  Application automatique des deux traits obliques de barrement et de la mention
+                  légale « Non Endossable » pour interdire toute falsification ou encaissement frauduleux.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          {/* 4. BANDEAU DE CONVERSION FINAL */}
+          <section className="demo-cta-card" aria-labelledby="cta-heading">
+            <div className="demo-cta-mesh" aria-hidden="true" />
+
+            <div className="demo-cta-content">
+              <h2 id="cta-heading" className="demo-cta-title">
+                Convaincu par la démonstration ?
+              </h2>
+              <p className="demo-cta-desc">
+                Équipez votre entreprise de VCheque dès aujourd&apos;hui. Licence permanente sans
+                abonnement mensuel avec support technique officiel en Algérie.
+              </p>
+            </div>
+
+            <div className="demo-cta-buttons">
+              <Link href="/commander" className="btn-cta-primary">
+                <ShoppingCart size={18} aria-hidden="true" />
+                <span>Acheter maintenant</span>
+              </Link>
+
+              <Link href="/contact" className="btn-cta-secondary">
+                <MessageSquare size={18} aria-hidden="true" />
+                <span>Poser une question</span>
               </Link>
             </div>
-          )}
+          </section>
         </div>
-
-        {/* Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="p-6 rounded-xl bg-white border border-[#e2dcce]">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle className="text-[#b99a5a]" size={20} />
-              <h4 className="font-bold text-[#122620]">1. Choix du modèle</h4>
-            </div>
-            <p className="text-sm text-[#4f5f58]">
-              Sélectionnez votre banque parmi les modèles intégrés (BNA, CPA, BEA, etc.) ou personnalisez les dimensions de votre chéquier.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-xl bg-white border border-[#e2dcce]">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle className="text-[#b99a5a]" size={20} />
-              <h4 className="font-bold text-[#122620]">2. Saisie intuitive</h4>
-            </div>
-            <p className="text-sm text-[#4f5f58]">
-              Indiquez le montant en chiffres. La conversion en lettres françaises s'exécute en temps réel avec accord des devises.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-xl bg-white border border-[#e2dcce]">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle className="text-[#b99a5a]" size={20} />
-              <h4 className="font-bold text-[#122620]">3. Impression & Sécurité</h4>
-            </div>
-            <p className="text-sm text-[#4f5f58]">
-              Insérez le chèque dans votre imprimante. Barrement et mention non endossable sont apposés automatiquement.
-            </p>
-          </div>
-        </div>
-
-        {/* CTA Banner */}
-        <div className="text-center p-8 rounded-2xl bg-[#fcfaf5] border border-[#b99a5a]/30">
-          <h3 className="text-xl font-bold text-[#122620] mb-2">Convaincu par la démonstration ?</h3>
-          <p className="text-sm text-[#4f5f58] mb-6">
-            Commandez votre licence commerciale définitive dès aujourd'hui ou contactez notre équipe pour toute question.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link
-              href="/commander"
-              className="btn btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold"
-            >
-              <ShoppingCart size={16} />
-              <span>Acheter ma licence</span>
-            </Link>
-            <Link
-              href="/contact"
-              className="px-6 py-3 rounded-lg text-sm font-semibold bg-white border border-[#e2dcce] text-[#122620] hover:bg-[#f5f2ea]"
-            >
-              Poser une question
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import licenseManager from '@/lib/licensing/license-manager';
 import { getSession } from '@/lib/auth/session';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -18,7 +20,7 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { action, quota, reason, activationId } = body;
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
     const actor = `ADMIN:${session.email}`;

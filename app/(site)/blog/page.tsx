@@ -35,6 +35,7 @@ export default async function BlogPage() {
     views_count: p.views_count,
     published_at: p.published_at ? p.published_at.toISOString() : null,
     created_at: p.created_at ? p.created_at.toISOString() : null,
+    updated_at: p.updated_at ? p.updated_at.toISOString() : null,
   }));
 
   return <BlogCatalog initialPosts={posts} />;

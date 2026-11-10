@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth/session';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
@@ -140,6 +143,15 @@ export async function PUT(
       },
     });
 
+    try {
+      revalidatePath('/blog');
+      revalidatePath(`/blog/${cleanSlug}`);
+      if (existing.slug !== cleanSlug) {
+        revalidatePath(`/blog/${existing.slug}`);
+      }
+      revalidatePath('/admin/blogs');
+    } catch {}
+
     return NextResponse.json({ success: true, post: updated });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -158,7 +170,7 @@ export async function POST(
 
     const { id } = await params;
     const postId = parseInt(id, 10);
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { action } = body;
 
     if (action === 'toggle_status') {
@@ -173,6 +185,10 @@ export async function POST(
           published_at: newStatus === 'published' && !current.published_at ? new Date() : current.published_at,
         },
       });
+      try {
+        revalidatePath('/blog');
+        revalidatePath('/admin/blogs');
+      } catch {}
       return NextResponse.json({ success: true, post: updated });
     }
 
@@ -187,6 +203,10 @@ export async function POST(
         }
       }
       await prisma.blogPost.delete({ where: { id: postId } });
+      try {
+        revalidatePath('/blog');
+        revalidatePath('/admin/blogs');
+      } catch {}
       return NextResponse.json({ success: true });
     }
 

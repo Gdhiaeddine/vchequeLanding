@@ -29,6 +29,7 @@ data/*.db-shm
 
 # Backups and temporary files
 /backup/
+data/*backup*.json
 .DS_Store
 Thumbs.db
 

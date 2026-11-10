@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
@@ -20,9 +20,11 @@ export default function EditBlogPostPage() {
     status: 'published',
   });
   const [existingCover, setExistingCover] = useState<string | null>(null);
+  const [coverTimestamp, setCoverTimestamp] = useState<number>(Date.now());
   const [removeCover, setRemoveCover] = useState(false);
   const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
   const [newCoverPreview, setNewCoverPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,6 +52,7 @@ export default function EditBlogPostPage() {
           status: p.status || 'published',
         });
         setExistingCover(p.cover_image_path || null);
+        setCoverTimestamp(p.updated_at ? new Date(p.updated_at).getTime() : Date.now());
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -72,10 +75,21 @@ export default function EditBlogPostPage() {
     }
   };
 
+  const handleCancelNewCover = () => {
+    setNewCoverFile(null);
+    setNewCoverPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleRemoveExistingCover = () => {
     setRemoveCover(true);
     setNewCoverFile(null);
     setNewCoverPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,9 +124,13 @@ export default function EditBlogPostPage() {
       setSuccess(true);
       if (data.post) {
         setExistingCover(data.post.cover_image_path);
+        setCoverTimestamp(Date.now());
         setRemoveCover(false);
         setNewCoverFile(null);
         setNewCoverPreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         setFormData((prev) => ({
           ...prev,
           slug: data.post.slug,
@@ -279,10 +297,7 @@ export default function EditBlogPostPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setNewCoverFile(null);
-                    setNewCoverPreview(null);
-                  }}
+                  onClick={handleCancelNewCover}
                   className="text-xs text-red-600 hover:text-red-700 font-semibold cursor-pointer"
                 >
                   Annuler
@@ -293,7 +308,7 @@ export default function EditBlogPostPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative w-20 h-12 rounded-lg overflow-hidden border border-[#e2dcce]">
                     <Image
-                      src={`/api/blog/cover/${id}`}
+                      src={`/api/blog/cover/${id}?t=${coverTimestamp}`}
                       alt={formData.title}
                       fill
                       unoptimized
@@ -328,6 +343,7 @@ export default function EditBlogPostPage() {
             ) : null}
 
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               className="w-full px-4 py-2 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all cursor-pointer"
