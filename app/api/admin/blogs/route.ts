@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth/session';
-import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { uploadBlogCoverToSupabase } from '@/lib/supabase/storage';
 
 export async function GET() {
   const session = await getSession();
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       const rawExt = path.extname(coverFile.name).toLowerCase();
       const ext = ['.jpg', '.jpeg', '.png', '.webp'].includes(rawExt) ? rawExt : '.jpg';
       const safeName = `${crypto.randomBytes(16).toString('hex')}${ext}`;
-      const uploadDir = path.resolve(process.cwd(), 'public/uploads/blog_covers');
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      fs.writeFileSync(path.join(uploadDir, safeName), buffer);
-      coverPath = `public/uploads/blog_covers/${safeName}`;
+      const mime = ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg';
+
+      // Téléversement sécurisé dans Supabase Storage (Bucket: blog-covers)
+      coverPath = await uploadBlogCoverToSupabase(buffer, safeName, mime);
     }
 
     const wordCount = content.trim().split(/\s+/).length;

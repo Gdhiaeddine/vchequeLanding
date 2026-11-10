@@ -23,6 +23,11 @@ export async function GET(
     return NextResponse.json({ error: 'Image non trouvée' }, { status: 404 });
   }
 
+  // Si l'image est hébergée sur Supabase Storage (URL absolue CDN)
+  if (post.cover_image_path.startsWith('http://') || post.cover_image_path.startsWith('https://')) {
+    return NextResponse.redirect(post.cover_image_path, 307);
+  }
+
   const filename = path.basename(post.cover_image_path);
   let filePath = path.resolve(process.cwd(), 'public/uploads/blog_covers', filename);
   if (!fs.existsSync(filePath)) {

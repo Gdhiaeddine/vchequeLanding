@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth/session';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { uploadBlogCoverToSupabase, deleteBlogCoverFromSupabase } from '@/lib/supabase/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,11 +94,15 @@ export async function PUT(
     let coverPath = existing.cover_image_path;
 
     if (removeCover && coverPath) {
-      const filePath = path.resolve(process.cwd(), coverPath);
-      if (fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch {}
+      if (coverPath.startsWith('http://') || coverPath.startsWith('https://')) {
+        await deleteBlogCoverFromSupabase(coverPath);
+      } else {
+        const filePath = path.resolve(process.cwd(), coverPath);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch {}
+        }
       }
       coverPath = null;
     }
@@ -105,11 +110,15 @@ export async function PUT(
     if (coverFile && coverFile.size > 0) {
       // Nettoyage ancien fichier
       if (coverPath) {
-        const oldPath = path.resolve(process.cwd(), coverPath);
-        if (fs.existsSync(oldPath)) {
-          try {
-            fs.unlinkSync(oldPath);
-          } catch {}
+        if (coverPath.startsWith('http://') || coverPath.startsWith('https://')) {
+          await deleteBlogCoverFromSupabase(coverPath);
+        } else {
+          const oldPath = path.resolve(process.cwd(), coverPath);
+          if (fs.existsSync(oldPath)) {
+            try {
+              fs.unlinkSync(oldPath);
+            } catch {}
+          }
         }
       }
 
@@ -117,10 +126,10 @@ export async function PUT(
       const rawExt = path.extname(coverFile.name).toLowerCase();
       const ext = ['.jpg', '.jpeg', '.png', '.webp'].includes(rawExt) ? rawExt : '.jpg';
       const safeName = `${crypto.randomBytes(16).toString('hex')}${ext}`;
-      const uploadDir = path.resolve(process.cwd(), 'public/uploads/blog_covers');
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      fs.writeFileSync(path.join(uploadDir, safeName), buffer);
-      coverPath = `public/uploads/blog_covers/${safeName}`;
+      const mime = ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg';
+
+      // Téléversement dans Supabase Storage
+      coverPath = await uploadBlogCoverToSupabase(buffer, safeName, mime);
     }
 
     const wordCount = content.trim().split(/\s+/).length;
@@ -196,11 +205,15 @@ export async function POST(
     if (action === 'delete') {
       const post = await prisma.blogPost.findUnique({ where: { id: postId } });
       if (post?.cover_image_path) {
-        const filePath = path.resolve(process.cwd(), post.cover_image_path);
-        if (fs.existsSync(filePath)) {
-          try {
-            fs.unlinkSync(filePath);
-          } catch {}
+        if (post.cover_image_path.startsWith('http://') || post.cover_image_path.startsWith('https://')) {
+          await deleteBlogCoverFromSupabase(post.cover_image_path);
+        } else {
+          const filePath = path.resolve(process.cwd(), post.cover_image_path);
+          if (fs.existsSync(filePath)) {
+            try {
+              fs.unlinkSync(filePath);
+            } catch {}
+          }
         }
       }
       await prisma.blogPost.delete({ where: { id: postId } });
