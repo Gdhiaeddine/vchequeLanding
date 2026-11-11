@@ -24,7 +24,7 @@ export default function Pricing() {
 
   const conditions = [
     'Licence permanente à vie sans frais mensuels',
-    'Activation sur poste de travail Windows (Windows 11, 10, 8, 7)',
+    'Activation sur poste de travail Windows (Windows 11, 10)',
     'Mises à jour de maintenance et corrections incluses',
     'Support technique pour l\'installation et la configuration des imprimantes',
   ];

@@ -238,7 +238,7 @@ export default function CgvPage() {
                 <p>
                   Le présent contrat a pour objet la concession d&apos;une <strong>licence d&apos;exploitation logicielle
                   permanente et non exclusive</strong> pour le logiciel bureautique professionnel <strong>VCheque</strong>,
-                  compatible avec les systèmes d&apos;exploitation Microsoft Windows (Windows 11, 10, 8, 7).
+                  compatible avec les systèmes d&apos;exploitation Microsoft Windows (Windows 11, 10).
                 </p>
 
                 <p>

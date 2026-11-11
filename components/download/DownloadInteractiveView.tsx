@@ -262,7 +262,7 @@ export default function DownloadInteractiveView({ release }: DownloadInteractive
 
               <div>
                 <div className="specs-item-label">Système d&apos;exploitation</div>
-                <div className="specs-item-value">Windows 11 / 10 / 8 / 7 (64-bit)</div>
+                <div className="specs-item-value">Windows 11 / 10 (64-bit)</div>
               </div>
             </div>
 

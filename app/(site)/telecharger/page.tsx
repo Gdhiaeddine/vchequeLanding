@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Télécharger VCheque pour Windows — Distribution Officielle en Algérie',
   description:
-    'Téléchargez l’installateur officiel certifié du logiciel d’impression de chèques bancaires VCheque pour Windows 11, 10, 8 et 7 (64-bit). Déploiement rapide et sécurisé édité par Virtanis en Algérie.',
+    'Téléchargez l’installateur officiel certifié du logiciel d’impression de chèques bancaires VCheque pour Windows 11 / 10 (64-bit). Déploiement rapide et sécurisé édité par Virtanis en Algérie.',
   keywords: [
     'télécharger VCheque',
     'installer VCheque Windows',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Télécharger VCheque pour Windows — Logiciel d’Impression de Chèques en Algérie',
     description:
-      'Installateur certifié pour PC Windows 11, 10, 8 et 7. Déclenchement automatique du téléchargement et guide de mise en route rapide.',
+      'Installateur certifié pour PC Windows 11 / 10 (64-bit). Déclenchement automatique du téléchargement et guide de mise en route rapide.',
     url: 'https://vcheque.virtanis.net/telecharger',
     siteName: 'VCheque par Virtanis',
     locale: 'fr_DZ',

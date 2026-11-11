@@ -384,7 +384,7 @@ export default async function CheckoutSuccessPage({
                 <div className="success-step-content">
                   <strong>Téléchargez l&apos;application :</strong>
                   <span>
-                    Récupérez le fichier d&apos;installation officiel pour Windows 11 / 10 / 8 / 7.
+                    Récupérez le fichier d&apos;installation officiel pour Windows 11 / 10 (64-bit).
                   </span>
                 </div>
               </li>
