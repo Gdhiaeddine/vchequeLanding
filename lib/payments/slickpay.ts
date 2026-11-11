@@ -111,14 +111,12 @@ export class SlickPayService {
       return mockPaymentUrl;
     }
 
-    // 1. Obtenir le contact UUID
-    const contactUuid = await this.getOrCreateContact({
-      nom: order.nom,
-      email: order.email,
-      telephone: order.telephone,
-      adresse: order.adresse,
-      reference: order.reference,
-    });
+    // 1. Préparation des coordonnées client
+    const nameParts = (order.nom || 'Client VCheque').trim().split(/\s+/);
+    const firstname = nameParts[0] || 'Client';
+    const lastname = nameParts.slice(1).join(' ') || 'VCheque';
+    const phone = order.telephone && order.telephone.trim() !== '' ? order.telephone.trim() : '0550000000';
+    const address = order.adresse && order.adresse.trim() !== '' ? order.adresse.trim() : 'Alger, Algérie';
 
     // 2. Résoudre le compte de réception (Account UUID / RIB marchand) requis par SlickPay v2
     let accountUuid = process.env.SLICKPAY_ACCOUNT_ID?.trim() || '';
@@ -130,29 +128,53 @@ export class SlickPayService {
             Accept: 'application/json',
           },
         });
-        const accData = await accRes.json();
-        if (accData?.data && Array.isArray(accData.data) && accData.data.length > 0) {
-          const defaultAcc = accData.data.find((a: any) => a.default === 1 || a.default === true) || accData.data[0];
-          accountUuid = defaultAcc.uuid;
+        if (accRes.ok) {
+          const accData = await accRes.json();
+          if (accData?.data && Array.isArray(accData.data) && accData.data.length > 0) {
+            const defaultAcc = accData.data.find((a: any) => a.default === 1 || a.default === true) || accData.data[0];
+            accountUuid = defaultAcc.uuid;
+          }
         }
       } catch (accErr) {
         console.warn('Impossible de récupérer automatiquement le compte SlickPay:', accErr);
       }
     }
 
-    // 3. Créer la facture sur SlickPay API v2
+    // 3. Optionnel : Résolution d'un contact existant
+    let contactUuid: string | null = null;
+    try {
+      contactUuid = await this.getOrCreateContact({
+        nom: order.nom,
+        email: order.email,
+        telephone: order.telephone,
+        adresse: order.adresse,
+        reference: order.reference,
+      });
+    } catch (contactErr) {
+      console.warn('Contact creation fallback to inline customer parameters:', contactErr);
+    }
+
+    // 4. Créer la facture sur SlickPay API v2 avec contact direct (inline) + fallback UUID
     const payload: any = {
-      amount: order.amount,
-      contact: contactUuid,
+      amount: Number(order.amount),
       url: `${returnUrl}?ref=${order.reference}`,
+      firstname,
+      lastname,
+      phone,
+      email: order.email,
+      address,
       items: [
         {
           name: `Licence VCheque - Réf ${order.reference}`,
-          price: order.amount,
+          price: Number(order.amount),
           quantity: 1,
         },
       ],
     };
+
+    if (contactUuid) {
+      payload.contact = contactUuid;
+    }
 
     if (accountUuid) {
       payload.account = accountUuid;
@@ -172,8 +194,15 @@ export class SlickPayService {
     const paymentUrl = data.url || data.invoice?.url;
 
     if (!res.ok || !paymentUrl) {
-      console.error('SlickPay invoice creation failed:', data);
-      throw new Error(data?.message || 'Échec de création de la facture sur la passerelle SlickPay.');
+      console.error('[SlickPay invoice creation failed]', { status: res.status, data });
+      let detailedMsg = data?.message || 'Échec de création de la facture sur la passerelle SlickPay.';
+      if (data?.errors && typeof data.errors === 'object') {
+        const errorDetails = Object.entries(data.errors)
+          .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+          .join(' | ');
+        detailedMsg = `${detailedMsg} (${errorDetails})`;
+      }
+      throw new Error(detailedMsg);
     }
 
     const invoiceId = (data.id || data.invoice?.id)?.toString() || null;
