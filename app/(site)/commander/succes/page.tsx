@@ -16,9 +16,11 @@ import {
   CreditCard,
   User,
   ShoppingBag,
+  Mail,
 } from 'lucide-react';
 import CopyButton from '@/components/CopyButton';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
@@ -35,13 +37,14 @@ interface CheckoutSuccessPageProps {
   searchParams: Promise<{
     ref?: string;
     simulated?: string;
+    resend?: string;
   }>;
 }
 
 export default async function CheckoutSuccessPage({
   searchParams,
 }: CheckoutSuccessPageProps) {
-  const { ref, simulated } = await searchParams;
+  const { ref, simulated, resend } = await searchParams;
 
   // 1. Redirection si référence absente
   if (!ref || ref.trim() === '') {
@@ -180,6 +183,40 @@ export default async function CheckoutSuccessPage({
     });
   }
 
+  let emailResent = false;
+  if (order.status === 'completed' && resend === 'true' && licenseKey) {
+    let maxActivations = 1;
+    let planTitle = 'Licence Commerciale VCheque (Perpétuelle)';
+
+    if (order.metadata) {
+      try {
+        const meta = JSON.parse(order.metadata);
+        if (meta.maxActivations && typeof meta.maxActivations === 'number') {
+          maxActivations = meta.maxActivations;
+        }
+        if (meta.plan === 'duo') planTitle = 'Licence Commerciale VCheque Duo (2 Postes)';
+        if (meta.plan === 'enterprise') planTitle = 'Licence Commerciale VCheque Entreprise (5 Postes)';
+      } catch {}
+    }
+
+    emailResent = await mailerService.sendLicenseConfirmationEmail({
+      to: order.email,
+      customerName: order.nom,
+      orderRef: order.reference,
+      licenseKey,
+      amount: order.amount,
+      company: order.entreprise,
+      phone: order.telephone,
+      address: order.adresse,
+      ville: order.ville,
+      wilaya: order.wilaya,
+      planTitle,
+      maxActivations,
+      paidAt: order.paid_at || new Date(),
+      transactionId: order.slickpay_invoice_id,
+    });
+  }
+
   // Formatage du montant en Dinars Algériens (DZD)
   const formattedAmount = new Intl.NumberFormat('fr-DZ', {
     minimumFractionDigits: 2,
@@ -243,9 +280,26 @@ export default async function CheckoutSuccessPage({
 
             {/* Information email & Facture PDF */}
             <p className="success-email-notice">
-              Un email de confirmation contenant votre clé et votre facture officielle PDF acquittée
+              Un email de confirmation contenant votre clé et votre facture officielle PDF acquittée en pièce jointe
               a été envoyé à <strong>{order.email}</strong>.
             </p>
+
+            {emailResent && (
+              <div className="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 text-center font-medium">
+                ✓ L&apos;email de confirmation avec la facture PDF acquittée en pièce jointe vient d&apos;être renvoyé avec succès à <strong>{order.email}</strong>.
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center justify-center">
+              <a
+                href={`/commander/succes?ref=${encodeURIComponent(order.reference)}&resend=true`}
+                className="inline-flex items-center gap-1.5 text-xs text-[#556660] hover:text-[#102C25] underline transition-colors"
+                title="Renvoyer l'email avec la facture PDF acquittée"
+              >
+                <Mail size={13} className="text-[#B99A5A]" />
+                <span>Renvoyer l&apos;email avec la facture PDF</span>
+              </a>
+            </div>
           </article>
 
           {/* CARTE 2 : DÉTAILS DE LA TRANSACTION */}

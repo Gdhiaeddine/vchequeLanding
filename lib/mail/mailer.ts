@@ -70,7 +70,7 @@ export class MailerService {
 
     const fromAddress = process.env.MAIL_FROM_ADDRESS || 'support@virtanis.net';
     const fromName = process.env.MAIL_FROM_NAME || 'VCheque par Virtanis';
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vcheque.virtanis.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vcheque.virtanis.net';
     const year = new Date().getFullYear();
 
     // Formatage propre du montant DZD avec espaces standards ASCII
@@ -97,8 +97,9 @@ export class MailerService {
         transactionId,
         planTitle,
       });
+      console.log(`[MailerService] Invoice PDF generated successfully for ${orderRef} (${pdfBuffer.length} bytes).`);
     } catch (pdfErr) {
-      console.error('Failed to generate PDF invoice attachment:', pdfErr);
+      console.error(`[MailerService] Failed to generate PDF invoice attachment for ${orderRef}:`, pdfErr);
     }
 
     const subject = `Confirmation & Facture Acquittée — Licence VCheque (Réf: ${orderRef})`;
@@ -409,12 +410,15 @@ Web : https://virtanis.net
 
     // 4. Préparation des pièces jointes
     const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
-    if (pdfBuffer) {
+    if (pdfBuffer && pdfBuffer.length > 0) {
       attachments.push({
         filename: `Facture-${orderRef}.pdf`,
         content: pdfBuffer,
         contentType: 'application/pdf',
       });
+      console.log(`[MailerService] Attached Facture-${orderRef}.pdf (${pdfBuffer.length} bytes) to email.`);
+    } else {
+      console.warn(`[MailerService] Warning: No PDF invoice attached for order ${orderRef}.`);
     }
 
     try {
