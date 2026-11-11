@@ -137,7 +137,7 @@ export default function AdminLoginPage() {
                   aria-required="true"
                   autoFocus
                   autoComplete="email"
-                  placeholder="admin@virtanis.dz"
+                  placeholder="admin@virtanis.net"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />

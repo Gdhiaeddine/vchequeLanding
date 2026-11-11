@@ -68,7 +68,7 @@ export class MailerService {
       transactionId,
     } = params;
 
-    const fromAddress = process.env.MAIL_FROM_ADDRESS || 'support@virtanis.dz';
+    const fromAddress = process.env.MAIL_FROM_ADDRESS || 'support@virtanis.net';
     const fromName = process.env.MAIL_FROM_NAME || 'VCheque par Virtanis';
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vcheque.virtanis.com';
     const year = new Date().getFullYear();
@@ -344,7 +344,7 @@ export class MailerService {
                       Besoin d'une assistance technique ou d'un devis multi-postes ?
                     </p>
                     <p style="margin: 0; font-size: 12.5px; font-weight: 600;">
-                      <a href="mailto:support@virtanis.dz" style="color: #7A5F2E; text-decoration: none;">support@virtanis.dz</a>
+                      <a href="mailto:support@virtanis.net" style="color: #7A5F2E; text-decoration: none;">support@virtanis.net</a>
                       <span style="color: #B99A5A; margin: 0 8px;">•</span>
                       <a href="${appUrl}/contact" style="color: #102C25; text-decoration: none;">Page de Contact</a>
                       <span style="color: #B99A5A; margin: 0 8px;">•</span>
@@ -400,7 +400,7 @@ Votre facture Facture-${orderRef}.pdf est jointe à ce message.
 Lien direct de téléchargement : ${appUrl}/api/checkout/invoice/${orderRef}
 
 ASSISTANCE TECHNIQUE :
-Email : support@virtanis.dz
+Email : support@virtanis.net
 Web : https://virtanis.net
 
 © ${year} Virtanis Technologies — Tous droits réservés.

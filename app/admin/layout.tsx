@@ -214,9 +214,9 @@ export default function AdminLayout({
           <div className="sidebar-footer-name">{adminUser?.name || 'Virtanis Systems'}</div>
           <div
             className="sidebar-footer-email truncate"
-            title={adminUser?.email || 'admin@virtanis.dz'}
+            title={adminUser?.email || 'admin@virtanis.net'}
           >
-            {adminUser?.email || 'admin@virtanis.dz'}
+            {adminUser?.email || 'admin@virtanis.net'}
           </div>
         </div>
       </aside>

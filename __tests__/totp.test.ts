@@ -17,14 +17,14 @@ describe('TOTP Two-Factor Authentication', () => {
 
   it('generates a valid otpauth uri', () => {
     const secret = generateTotpSecret();
-    const uri = getTotpUri('admin@virtanis.dz', secret);
+    const uri = getTotpUri('admin@virtanis.net', secret);
     expect(uri).toContain('otpauth://totp/');
     expect(uri).toContain('secret=' + secret);
   });
 
   it('generates a QR code data url', async () => {
     const secret = generateTotpSecret();
-    const uri = getTotpUri('admin@virtanis.dz', secret);
+    const uri = getTotpUri('admin@virtanis.net', secret);
     const dataUrl = await generateQrCodeDataUrl(uri);
     expect(dataUrl).toContain('data:image/png;base64,');
   });

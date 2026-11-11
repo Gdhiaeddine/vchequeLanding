@@ -89,5 +89,5 @@ VchequeNext/
 ## Administration
 
 Accès au portail d'administration : [http://localhost:3000/admin](http://localhost:3000/admin)
-- Compte par défaut : `admin@virtanis.dz`
+- Compte par défaut : `admin@virtanis.net`
 - Sécurité renforcée avec vérification 2FA TOTP obligatoire.

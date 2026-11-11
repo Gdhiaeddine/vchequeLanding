@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: 'VCheque — Logiciel d’impression de chèques en Algérie',
     description:
       'Gagnez du temps et évitez les erreurs de remplissage de chèques avec VCheque.',
-    url: 'https://vcheque.virtanis.dz',
+    url: 'https://vcheque.virtanis.net',
     siteName: 'VCheque',
     locale: 'fr_DZ',
     type: 'website',

@@ -543,10 +543,10 @@ export default function ContactView() {
                     <div>
                       <div className="contact-direct-label">Courriel d&apos;assistance</div>
                       <a
-                        href="mailto:contact@virtanis.dz"
+                        href="mailto:contact@virtanis.net"
                         className="contact-direct-value block"
                       >
-                        contact@virtanis.dz
+                        contact@virtanis.net
                       </a>
                     </div>
                   </div>

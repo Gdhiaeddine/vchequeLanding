@@ -137,7 +137,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica')
         .fontSize(7.5)
         .fillColor(COLOR_FAINT)
-        .text('www.virtanis.net • support@virtanis.dz', marginX, headerY + 44);
+        .text('www.virtanis.net • support@virtanis.net', marginX, headerY + 44);
 
       // Bloc de droite : Facture, Référence, Date & Statut
       // Titre Facture Acquittée
@@ -212,15 +212,14 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica-Bold')
         .fontSize(9.5)
         .fillColor(COLOR_BLACK)
-        .text('Virtanis Technologies', marginX + 10, partyY + 20);
+        .text('Virtanis Technologies', marginX + 10, partyY + 22);
 
       doc
         .font('Helvetica')
         .fontSize(8)
         .fillColor(COLOR_MUTED)
-        .text('Plateforme VCheque Algérie', marginX + 10, partyY + 33)
-        .text('Alger, Algérie • Conforme Loi 18-05 E-Commerce', marginX + 10, partyY + 45)
-        .text('support@virtanis.dz • www.virtanis.net', marginX + 10, partyY + 57);
+        .text('Plateforme VCheque Algérie', marginX + 10, partyY + 38)
+        .text('support@virtanis.net • www.virtanis.net', marginX + 10, partyY + 52);
 
       // Cartouche Client (Droite)
       doc
@@ -426,7 +425,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica')
         .fontSize(7)
         .fillColor(COLOR_MUTED)
-        .text('Signature Numérique & Intégrité Certifiées', marginX, sealY + 33, {
+        .text('Signature Numérique', marginX, sealY + 33, {
           width: leftColWidth,
           align: 'center',
         });
@@ -435,7 +434,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .font('Helvetica-Bold')
         .fontSize(6.5)
         .fillColor(COLOR_FAINT)
-        .text('VIRTANIS TECHNOLOGIES ALGERIA • AUTHENTICITÉ GARANTIE', marginX, sealY + 46, {
+        .text('VIRTANIS TECHNOLOGIES ALGERIA', marginX, sealY + 46, {
           width: leftColWidth,
           align: 'center',
         });
@@ -534,7 +533,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .fontSize(7.5)
         .fillColor(COLOR_MUTED)
         .text(
-          'Virtanis — Éditeur de solutions logicielles professionnelles — www.virtanis.net — contact@virtanis.dz',
+          'Virtanis — Éditeur de solutions logicielles professionnelles — www.virtanis.net — support@virtanis.net',
           marginX,
           footerY + 8,
           { width: contentWidth, align: 'center' }
@@ -545,7 +544,7 @@ export async function generateInvoicePdf(params: InvoiceParams): Promise<Buffer>
         .fontSize(7)
         .fillColor(COLOR_FAINT)
         .text(
-          'Facture émise par voie électronique en conformité avec la Loi n° 18-05 relative au commerce électronique en Algérie.',
+          'Facture émise par voie électronique.',
           marginX,
           footerY + 19,
           { width: contentWidth, align: 'center' }

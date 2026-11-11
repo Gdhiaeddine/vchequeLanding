@@ -51,7 +51,7 @@ export default function ContactPage() {
         {
           '@type': 'ContactPoint',
           contactType: 'customer support',
-          email: 'contact@virtanis.dz',
+          email: 'contact@virtanis.net',
           availableLanguage: ['French', 'Arabic'],
           hoursAvailable: {
             '@type': 'OpeningHoursSpecification',
@@ -73,7 +73,7 @@ export default function ContactPage() {
         {
           '@type': 'ContactPoint',
           contactType: 'sales',
-          email: 'contact@virtanis.dz',
+          email: 'contact@virtanis.net',
           availableLanguage: ['French', 'Arabic'],
           areaServed: 'DZ',
         },

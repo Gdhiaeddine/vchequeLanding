@@ -216,7 +216,7 @@ export default function CgvPage() {
                   </div>
                   <div className="legal-info-row">
                     <span className="legal-info-label">Contact officiel &amp; Support :</span>
-                    <span className="legal-info-val">contact@virtanis.net  •  support@virtanis.dz</span>
+                    <span className="legal-info-val">contact@virtanis.net  •  support@virtanis.net</span>
                   </div>
                 </div>
 

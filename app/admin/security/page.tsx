@@ -374,7 +374,7 @@ export default function AdminSecurityPage() {
               </label>
               <input
                 type="email"
-                placeholder="Ex: nouveau-mail@virtanis.dz"
+                placeholder="Ex: nouveau-mail@virtanis.net"
                 value={credForm.newEmail}
                 onChange={(e) => setCredForm((prev) => ({ ...prev, newEmail: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
