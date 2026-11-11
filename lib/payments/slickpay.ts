@@ -120,8 +120,28 @@ export class SlickPayService {
       reference: order.reference,
     });
 
-    // 2. Créer la facture sur SlickPay API v2
-    const payload = {
+    // 2. Résoudre le compte de réception (Account UUID / RIB marchand) requis par SlickPay v2
+    let accountUuid = process.env.SLICKPAY_ACCOUNT_ID?.trim() || '';
+    if (!accountUuid) {
+      try {
+        const accRes = await fetch(`${this.getBaseUrl()}/users/accounts`, {
+          headers: {
+            Authorization: `Bearer ${this.publicKey}`,
+            Accept: 'application/json',
+          },
+        });
+        const accData = await accRes.json();
+        if (accData?.data && Array.isArray(accData.data) && accData.data.length > 0) {
+          const defaultAcc = accData.data.find((a: any) => a.default === 1 || a.default === true) || accData.data[0];
+          accountUuid = defaultAcc.uuid;
+        }
+      } catch (accErr) {
+        console.warn('Impossible de récupérer automatiquement le compte SlickPay:', accErr);
+      }
+    }
+
+    // 3. Créer la facture sur SlickPay API v2
+    const payload: any = {
       amount: order.amount,
       contact: contactUuid,
       url: `${returnUrl}?ref=${order.reference}`,
@@ -133,6 +153,10 @@ export class SlickPayService {
         },
       ],
     };
+
+    if (accountUuid) {
+      payload.account = accountUuid;
+    }
 
     const res = await fetch(`${this.getBaseUrl()}/users/invoices`, {
       method: 'POST',
