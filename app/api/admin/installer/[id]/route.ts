@@ -3,6 +3,10 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth/session';
 import fs from 'fs';
 import path from 'path';
+import { deleteInstallerFromSupabase } from '@/lib/supabase/storage';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
@@ -36,15 +40,21 @@ export async function POST(
     if (action === 'delete') {
       const release = await prisma.appRelease.findUnique({ where: { id: releaseId } });
       if (release) {
-        let filePath = path.resolve(process.cwd(), release.storage_path);
-        if (!fs.existsSync(filePath)) {
-          filePath = path.resolve(process.cwd(), 'data/uploads/installers', path.basename(release.storage_path));
-        }
-        if (fs.existsSync(filePath)) {
-          try {
+        // 1. Suppression dans Supabase Storage
+        await deleteInstallerFromSupabase(release.storage_path);
+
+        // 2. Suppression sur disque local si le fichier y réside
+        try {
+          const filename = path.basename(release.storage_path.split('?')[0]);
+          let filePath = path.resolve(process.cwd(), 'data/uploads/installers', filename);
+          if (!fs.existsSync(filePath)) {
+            filePath = path.resolve(process.cwd(), release.storage_path);
+          }
+          if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-          } catch {}
-        }
+          }
+        } catch {}
+
         await prisma.appRelease.delete({ where: { id: releaseId } });
       }
       return NextResponse.json({ success: true });

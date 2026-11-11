@@ -4,6 +4,10 @@ import { getSession } from '@/lib/auth/session';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { uploadInstallerToSupabase } from '@/lib/supabase/storage';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,23 +27,42 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const sha256 = crypto.createHash('sha256').update(buffer).digest('hex');
+    const safeFilename = `${crypto.randomBytes(16).toString('hex')}.exe`;
 
-    const uploadsDir = path.resolve(process.cwd(), 'data/uploads/installers');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // 1. Téléversement prioritaire dans Supabase Storage (persistance cloud pour Vercel)
+    let storagePath = `installers/${safeFilename}`;
+    try {
+      const publicUrl = await uploadInstallerToSupabase(
+        buffer,
+        safeFilename,
+        file.type || 'application/x-msdownload'
+      );
+      storagePath = publicUrl;
+      console.log('[Installer Upload] Successfully uploaded to Supabase Storage:', publicUrl);
+    } catch (sbErr) {
+      console.warn('[Installer Upload] Supabase upload failed, using local storage fallback:', sbErr);
     }
 
-    const safeFilename = `${crypto.randomBytes(16).toString('hex')}.exe`;
-    const destPath = path.join(uploadsDir, safeFilename);
-    fs.writeFileSync(destPath, buffer);
+    // 2. Écriture sur disque local si le système de fichiers est accessible
+    try {
+      const uploadsDir = path.resolve(process.cwd(), 'data/uploads/installers');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const destPath = path.join(uploadsDir, safeFilename);
+      fs.writeFileSync(destPath, buffer);
+    } catch (fsErr) {
+      console.warn('[Installer Upload] Local disk write skipped (read-only environment):', fsErr);
+    }
 
+    // 3. Enregistrement en base de données
     const release = await prisma.appRelease.create({
       data: {
         version: version.trim(),
         filename: file.name,
-        storage_path: `data/uploads/installers/${safeFilename}`,
+        storage_path: storagePath,
         file_size: buffer.length,
-        mime_type: 'application/x-msdownload',
+        mime_type: file.type || 'application/x-msdownload',
         sha256,
         is_active: false,
         release_notes: release_notes || null,

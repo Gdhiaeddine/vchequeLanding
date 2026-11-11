@@ -14,6 +14,77 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
 });
 
 export const BLOG_BUCKET = 'blog-covers';
+export const INSTALLER_BUCKET = 'installers';
+
+/**
+ * Téléverse un fichier d'installation (.exe, .msi) dans le bucket Supabase Storage.
+ * @param buffer Contenu binaire de l'installateur
+ * @param filename Nom du fichier dans le bucket (ex: safe hash + .exe)
+ * @param mimeType Type MIME (par défaut: application/x-msdownload)
+ * @returns L'URL publique permanente CDN de l'installateur
+ */
+export async function uploadInstallerToSupabase(
+  buffer: Buffer,
+  filename: string,
+  mimeType: string = 'application/x-msdownload'
+): Promise<string> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(INSTALLER_BUCKET)
+    .upload(filename, buffer, {
+      contentType: mimeType,
+      upsert: true,
+    });
+
+  if (error) {
+    console.error('[Supabase Storage] Installer upload error:', error);
+    throw new Error(`Erreur lors du téléversement de l'installateur sur Supabase: ${error.message}`);
+  }
+
+  const { data: urlData } = supabaseAdmin.storage
+    .from(INSTALLER_BUCKET)
+    .getPublicUrl(data.path);
+
+  return urlData.publicUrl;
+}
+
+/**
+ * Supprime un fichier installateur du bucket Supabase Storage.
+ * @param filenameOrUrl URL ou nom du fichier
+ */
+export async function deleteInstallerFromSupabase(filenameOrUrl: string): Promise<boolean> {
+  try {
+    if (!filenameOrUrl) return false;
+    const filename = filenameOrUrl.split('/').pop()?.split('?')[0];
+    if (!filename) return false;
+
+    const { error } = await supabaseAdmin.storage
+      .from(INSTALLER_BUCKET)
+      .remove([filename]);
+
+    if (error) {
+      console.warn('[Supabase Storage] Installer delete error:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Supabase Storage] Installer delete exception:', err);
+    return false;
+  }
+}
+
+/**
+ * Récupère l'URL publique Supabase d'un installateur.
+ */
+export function getInstallerPublicUrl(filenameOrPath: string): string {
+  if (filenameOrPath.startsWith('http://') || filenameOrPath.startsWith('https://')) {
+    return filenameOrPath;
+  }
+  const filename = filenameOrPath.split('/').pop()?.split('?')[0] || filenameOrPath;
+  const { data } = supabaseAdmin.storage
+    .from(INSTALLER_BUCKET)
+    .getPublicUrl(filename);
+  return data.publicUrl;
+}
 
 /**
  * Téléverse une image de couverture dans le bucket Supabase Storage.
