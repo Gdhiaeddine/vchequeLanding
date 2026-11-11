@@ -2,7 +2,6 @@ import React from 'react';
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 import BlogCatalog, { BlogPostItem } from '@/components/blog/BlogCatalog';
-import type { BlogPost } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +18,12 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const postsRaw = await prisma.blogPost.findMany({
+  const postsRaw: any[] = await prisma.blogPost.findMany({
     where: { status: 'published' },
     orderBy: { published_at: 'desc' },
   });
 
-  const posts: BlogPostItem[] = postsRaw.map((p: BlogPost | any) => ({
+  const posts: BlogPostItem[] = postsRaw.map((p) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
