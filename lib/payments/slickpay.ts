@@ -28,67 +28,8 @@ export class SlickPayService {
   }
 
   /**
-   * Crée ou résout un contact SlickPay avec un RIB requis par l'API v2.
-   */
-  private async getOrCreateContact(order: {
-    nom: string;
-    email: string;
-    telephone?: string | null;
-    adresse?: string | null;
-    reference: string;
-  }): Promise<string> {
-    const nameParts = (order.nom || 'Client VCheque').trim().split(/\s+/);
-    const firstname = nameParts[0] || 'Client';
-    const lastname = nameParts.slice(1).join(' ') || 'VCheque';
-    const phone = order.telephone && order.telephone.trim() !== '' ? order.telephone : '0550000000';
-    const address = order.adresse && order.adresse.trim() !== '' ? order.adresse : 'Alger, Algérie';
-    
-    // Génération d'un RIB valide à 20 chiffres conforme aux banques/CCP algériennes
-    const randDigits = Math.floor(100000000000 + Math.random() * 900000000000).toString();
-    const rib = `00799999${randDigits}`;
-
-    const res = await fetch(`${this.getBaseUrl()}/users/contacts`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.publicKey}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        firstname,
-        lastname,
-        email: order.email,
-        phone,
-        address,
-        rib,
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok && data?.uuid) {
-      return data.uuid;
-    }
-
-    // Si erreur de création, tenter de récupérer un contact existant
-    if (data?.errors || !res.ok) {
-      console.warn('SlickPay contact creation warning:', data);
-      const listRes = await fetch(`${this.getBaseUrl()}/users/contacts`, {
-        headers: {
-          Authorization: `Bearer ${this.publicKey}`,
-          Accept: 'application/json',
-        },
-      });
-      const listData = await listRes.json();
-      if (listData?.data && Array.isArray(listData.data) && listData.data.length > 0) {
-        return listData.data[0].uuid;
-      }
-    }
-
-    throw new Error(data?.message || 'Impossible de créer le contact de paiement SlickPay.');
-  }
-
-  /**
-   * Crée une facture SlickPay pour une commande donnée et retourne l'URL de paiement SATIM.
+   * Crée une facture SlickPay API v2 pour une commande donnée et retourne l'URL de paiement SATIM.
+   * Aligne le payload directement avec la spécification officielle (contact inline sans RIB fictif).
    */
   public async createInvoice(orderId: number, returnUrl: string): Promise<string> {
     const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -111,14 +52,18 @@ export class SlickPayService {
       return mockPaymentUrl;
     }
 
-    // 1. Préparation des coordonnées client
+    // 1. Préparation des coordonnées client inline (selon doc officielle SlickPay)
     const nameParts = (order.nom || 'Client VCheque').trim().split(/\s+/);
     const firstname = nameParts[0] || 'Client';
     const lastname = nameParts.slice(1).join(' ') || 'VCheque';
-    const phone = order.telephone && order.telephone.trim() !== '' ? order.telephone.trim() : '0550000000';
-    const address = order.adresse && order.adresse.trim() !== '' ? order.adresse.trim() : 'Alger, Algérie';
+    const phone =
+      order.telephone && order.telephone.trim() !== ''
+        ? order.telephone.trim().replace(/[^0-9+]/g, '') || '0550000000'
+        : '0550000000';
+    const address =
+      order.adresse && order.adresse.trim() !== '' ? order.adresse.trim() : 'Alger, Algérie';
 
-    // 2. Résoudre le compte de réception (Account UUID / RIB marchand) requis par SlickPay v2
+    // 2. Résoudre le compte de réception (Account UUID marchand) si nécessaire
     let accountUuid = process.env.SLICKPAY_ACCOUNT_ID?.trim() || '';
     if (!accountUuid) {
       try {
@@ -127,42 +72,32 @@ export class SlickPayService {
             Authorization: `Bearer ${this.publicKey}`,
             Accept: 'application/json',
           },
+          cache: 'no-store',
         });
         if (accRes.ok) {
           const accData = await accRes.json();
           if (accData?.data && Array.isArray(accData.data) && accData.data.length > 0) {
-            const defaultAcc = accData.data.find((a: any) => a.default === 1 || a.default === true) || accData.data[0];
+            const defaultAcc =
+              accData.data.find((a: any) => a.default === 1 || a.default === true) ||
+              accData.data[0];
             accountUuid = defaultAcc.uuid;
           }
         }
       } catch (accErr) {
-        console.warn('Impossible de récupérer automatiquement le compte SlickPay:', accErr);
+        console.warn('SlickPay account lookup skipped (using SlickPay default):', accErr);
       }
     }
 
-    // 3. Optionnel : Résolution d'un contact existant
-    let contactUuid: string | null = null;
-    try {
-      contactUuid = await this.getOrCreateContact({
-        nom: order.nom,
-        email: order.email,
-        telephone: order.telephone,
-        adresse: order.adresse,
-        reference: order.reference,
-      });
-    } catch (contactErr) {
-      console.warn('Contact creation fallback to inline customer parameters:', contactErr);
-    }
-
-    // 4. Créer la facture sur SlickPay API v2 avec contact direct (inline) + fallback UUID
-    const payload: any = {
+    // 3. Payload conforme à POST /api/v2/users/invoices
+    const payload: Record<string, any> = {
       amount: Number(order.amount),
       url: `${returnUrl}?ref=${order.reference}`,
       firstname,
       lastname,
       phone,
-      email: order.email,
+      email: order.email.trim(),
       address,
+      note: `Commande VCheque ${order.reference}`,
       items: [
         {
           name: `Licence VCheque - Réf ${order.reference}`,
@@ -171,10 +106,6 @@ export class SlickPayService {
         },
       ],
     };
-
-    if (contactUuid) {
-      payload.contact = contactUuid;
-    }
 
     if (accountUuid) {
       payload.account = accountUuid;
@@ -190,22 +121,50 @@ export class SlickPayService {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
-    const paymentUrl = data.url || data.invoice?.url;
+    const rawText = await res.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      console.error('[SlickPay] Non-JSON response:', rawText);
+      throw new Error(`Réponse invalide de SlickPay (HTTP ${res.status}).`);
+    }
+
+    // Gestion explicite d'erreur d'authentification (souvent due à un mismatch Sandbox / Production)
+    if (res.status === 401) {
+      const envName = this.isSandbox ? 'Sandbox (devapi)' : 'Production (prodapi)';
+      throw new Error(
+        `Authentification SlickPay refusée (401 Unauthenticated) sur l'environnement ${envName}. Vérifiez votre SLICKPAY_PUBLIC_KEY et SLICKPAY_SANDBOX.`
+      );
+    }
+
+    const paymentUrl = data.url || data.invoice?.url || data.data?.url;
 
     if (!res.ok || !paymentUrl) {
-      console.error('[SlickPay invoice creation failed]', { status: res.status, data });
-      let detailedMsg = data?.message || 'Échec de création de la facture sur la passerelle SlickPay.';
+      console.error('[SlickPay invoice creation failed]', {
+        status: res.status,
+        env: this.isSandbox ? 'sandbox' : 'production',
+        data,
+      });
+
+      let detailedMsg =
+        data?.message ||
+        data?.error ||
+        `Échec de création de la facture sur SlickPay (HTTP ${res.status}).`;
+
       if (data?.errors && typeof data.errors === 'object') {
         const errorDetails = Object.entries(data.errors)
           .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
           .join(' | ');
         detailedMsg = `${detailedMsg} (${errorDetails})`;
+      } else if (typeof data?.contact === 'string') {
+        detailedMsg = `${detailedMsg} (${data.contact})`;
       }
+
       throw new Error(detailedMsg);
     }
 
-    const invoiceId = (data.id || data.invoice?.id)?.toString() || null;
+    const invoiceId = (data.id || data.invoice?.id || data.data?.id)?.toString() || null;
 
     await prisma.order.update({
       where: { id: order.id },
@@ -222,7 +181,9 @@ export class SlickPayService {
   /**
    * Vérifie le statut d'une facture auprès de l'API SlickPay.
    */
-  public async getInvoice(invoiceId: number | string): Promise<{ completed: boolean; status: string; raw?: any }> {
+  public async getInvoice(
+    invoiceId: number | string
+  ): Promise<{ completed: boolean; status: string; raw?: any }> {
     if (!invoiceId || invoiceId.toString().startsWith('MOCK-INV-')) {
       return { completed: false, status: 'Mock' };
     }
@@ -243,19 +204,20 @@ export class SlickPayService {
 
       const data = await res.json();
       const invoiceData = data?.data || data?.invoice || data;
-      
+
       const isCompleted =
         data?.completed === 1 ||
         data?.completed === true ||
         invoiceData?.completed === 1 ||
         invoiceData?.completed === true ||
         invoiceData?.pay_status === 1 ||
+        invoiceData?.payment_status === 'paid' ||
         invoiceData?.status === 'Payé' ||
         invoiceData?.status === 'Complété';
 
       return {
         completed: !!isCompleted,
-        status: invoiceData?.status || 'Unknown',
+        status: invoiceData?.payment_status || invoiceData?.status || 'Unknown',
         raw: data,
       };
     } catch (err: any) {
