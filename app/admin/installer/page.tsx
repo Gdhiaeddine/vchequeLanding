@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Download, Upload, Trash2, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Download, Upload, Trash2, CheckCircle2, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function AdminInstallerPage() {
   const [releases, setReleases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadStep, setUploadStep] = useState<string>('');
   const [version, setVersion] = useState('');
   const [releaseNotes, setReleaseNotes] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,38 +32,104 @@ export default function AdminInstallerPage() {
     fetchReleases();
   }, []);
 
+  // Calcul du hash SHA-256 côté client via Web Crypto API (rapide, sans saturer la RAM)
+  const computeFileSha256 = async (file: File): Promise<string> => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile || !version) return;
 
     setUploading(true);
+    setUploadProgress(0);
+    setUploadStep('Calcul de l’empreinte de sécurité SHA-256...');
     setMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('version', version);
-      formData.append('release_notes', releaseNotes);
+      // 1. Calcul du SHA-256 dans le navigateur
+      const sha256 = await computeFileSha256(selectedFile);
 
-      const res = await fetch('/api/admin/installer/upload', {
+      // 2. Demande d'URL signée au serveur (contourne la limite de 4.5MB Vercel)
+      setUploadStep('Génération de l’accès direct au stockage Cloud...');
+      const urlRes = await fetch('/api/admin/installer/upload-url', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: selectedFile.name }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Erreur lors du téléversement');
+      const urlData = await urlRes.json();
+      if (!urlRes.ok || !urlData.success) {
+        throw new Error(urlData.error || 'Erreur lors de la préparation du téléversement.');
       }
 
-      setMessage({ type: 'success', text: 'Nouvelle version téléversée avec succès.' });
+      const { signedUrl, publicUrl } = urlData;
+
+      // 3. Téléversement direct du binaire vers Supabase Storage avec suivi de progression XMLHttpRequest
+      setUploadStep('Téléversement direct du fichier vers le CDN...');
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', signedUrl, true);
+        xhr.setRequestHeader('Content-Type', selectedFile.type || 'application/x-msdownload');
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const percent = Math.round((evt.loaded / evt.total) * 100);
+            setUploadProgress(percent);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Échec du transfert vers le stockage Cloud (HTTP ${xhr.status})`));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Erreur réseau lors de l’envoi direct vers le stockage Cloud.'));
+        };
+
+        xhr.send(selectedFile);
+      });
+
+      // 4. Enregistrement en base de données via Next.js
+      setUploadStep('Enregistrement de la version dans le catalogue...');
+      const finalizeRes = await fetch('/api/admin/installer/finalize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          version: version.trim(),
+          filename: selectedFile.name,
+          storage_path: publicUrl,
+          file_size: selectedFile.size,
+          mime_type: selectedFile.type || 'application/x-msdownload',
+          sha256,
+          release_notes: releaseNotes.trim() || null,
+        }),
+      });
+
+      const finalizeData = await finalizeRes.json();
+      if (!finalizeRes.ok || !finalizeData.success) {
+        throw new Error(finalizeData.error || 'Erreur lors de la finalisation.');
+      }
+
+      setMessage({ type: 'success', text: `Version v${version} téléversée et scellée avec succès.` });
       setVersion('');
       setReleaseNotes('');
       setSelectedFile(null);
+      setUploadProgress(100);
       await fetchReleases();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+      console.error(err);
+      setMessage({ type: 'error', text: err.message || 'Une erreur est survenue lors du téléversement.' });
     } finally {
       setUploading(false);
+      setUploadStep('');
     }
   };
 
@@ -122,7 +190,7 @@ export default function AdminInstallerPage() {
               Publier une nouvelle version de VCheque
             </h3>
             <p className="text-xs text-[#6b7c74]">
-              Téléversement sécurisé, calcul d&apos;empreinte SHA-256 et mise en ligne du binaire
+              Téléversement direct haute capacité (Cloud CDN), calcul d&apos;empreinte SHA-256 et déploiement
             </p>
           </div>
         </div>
@@ -137,9 +205,15 @@ export default function AdminInstallerPage() {
                 type="file"
                 accept=".exe,.msi"
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
+                disabled={uploading}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all disabled:opacity-60"
                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
               />
+              {selectedFile && (
+                <p className="text-[11px] text-[#6b7c74] mt-1">
+                  Taille du fichier : {(selectedFile.size / (1024 * 1024)).toFixed(1)} Mo
+                </p>
+              )}
             </div>
 
             <div>
@@ -149,8 +223,9 @@ export default function AdminInstallerPage() {
               <input
                 type="text"
                 required
+                disabled={uploading}
                 placeholder="1.0.1"
-                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs sm:text-sm font-mono text-[#122620] placeholder-[#86928b] focus:border-[#b99a5a] focus:outline-none transition-all"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs sm:text-sm font-mono text-[#122620] placeholder-[#86928b] focus:border-[#b99a5a] focus:outline-none transition-all disabled:opacity-60"
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
               />
@@ -163,12 +238,32 @@ export default function AdminInstallerPage() {
             </label>
             <textarea
               rows={3}
+              disabled={uploading}
               placeholder="Ex: Correction de l'alignement sur imprimantes Epson, ajout du modèle BNA 2026..."
-              className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs sm:text-sm text-[#122620] placeholder-[#86928b] focus:border-[#b99a5a] focus:outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs sm:text-sm text-[#122620] placeholder-[#86928b] focus:border-[#b99a5a] focus:outline-none transition-all disabled:opacity-60"
               value={releaseNotes}
               onChange={(e) => setReleaseNotes(e.target.value)}
             />
           </div>
+
+          {/* Barre de progression pendant l'upload */}
+          {uploading && (
+            <div className="space-y-2 p-4 bg-[#fdfbf7] rounded-xl border border-[#e2dcce]">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-[#122620] flex items-center gap-2">
+                  <RefreshCw size={13} className="animate-spin text-[#b99a5a]" />
+                  {uploadStep}
+                </span>
+                <span className="font-mono font-bold text-[#b99a5a]">{uploadProgress}%</span>
+              </div>
+              <div className="w-full h-2 bg-[#e2dcce] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#b99a5a] to-[#122620] transition-all duration-200"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end pt-2">
             <button
@@ -176,8 +271,17 @@ export default function AdminInstallerPage() {
               disabled={uploading || !selectedFile || !version}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#122620] text-white hover:bg-[#1a382f] text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Upload size={15} />
-              <span>{uploading ? 'Téléversement en cours...' : 'Téléverser et analyser'}</span>
+              {uploading ? (
+                <>
+                  <RefreshCw size={15} className="animate-spin" />
+                  <span>Téléversement en cours...</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={15} />
+                  <span>Téléverser et analyser</span>
+                </>
+              )}
             </button>
           </div>
         </form>

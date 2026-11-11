@@ -17,6 +17,38 @@ export const BLOG_BUCKET = 'blog-covers';
 export const INSTALLER_BUCKET = 'installers';
 
 /**
+ * Crée une URL d'upload signée directement pour Supabase Storage.
+ * Permet au navigateur de téléverser de gros fichiers (jusqu'à 500MB+)
+ * directement sur Supabase, contournant la limite de 4.5MB des fonctions Vercel.
+ */
+export async function createInstallerUploadSignedUrl(filename: string): Promise<{
+  signedUrl: string;
+  token: string;
+  path: string;
+  publicUrl: string;
+}> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(INSTALLER_BUCKET)
+    .createSignedUploadUrl(filename);
+
+  if (error || !data) {
+    console.error('[Supabase Storage] createSignedUploadUrl error:', error);
+    throw new Error(`Erreur lors de la préparation du téléversement: ${error?.message || 'Erreur inconnue'}`);
+  }
+
+  const { data: urlData } = supabaseAdmin.storage
+    .from(INSTALLER_BUCKET)
+    .getPublicUrl(filename);
+
+  return {
+    signedUrl: data.signedUrl,
+    token: data.token,
+    path: data.path,
+    publicUrl: urlData.publicUrl,
+  };
+}
+
+/**
  * Téléverse un fichier d'installation (.exe, .msi) dans le bucket Supabase Storage.
  * @param buffer Contenu binaire de l'installateur
  * @param filename Nom du fichier dans le bucket (ex: safe hash + .exe)
