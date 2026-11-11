@@ -25,6 +25,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [adminUser, setAdminUser] = useState<{ email: string; name: string } | null>(null);
 
   // Skip sidebar & topbar for login and 2FA auth challenge pages
   const isAuthPage =
@@ -35,6 +36,20 @@ export default function AdminLayout({
   useEffect(() => {
     if (isAuthPage) return;
     let isMounted = true;
+
+    async function loadAdminUser() {
+      try {
+        const res = await fetch('/api/admin/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.success && data.user) {
+            setAdminUser(data.user);
+          }
+        }
+      } catch {
+        // Silently tolerate if fetch fails
+      }
+    }
 
     async function loadUnreadCount() {
       try {
@@ -50,6 +65,7 @@ export default function AdminLayout({
       }
     }
 
+    loadAdminUser();
     loadUnreadCount();
     return () => {
       isMounted = false;
@@ -195,8 +211,13 @@ export default function AdminLayout({
               TLS 1.3
             </span>
           </div>
-          <div className="sidebar-footer-name">Virtanis Systems</div>
-          <div className="sidebar-footer-email">admin@virtanis.dz</div>
+          <div className="sidebar-footer-name">{adminUser?.name || 'Virtanis Systems'}</div>
+          <div
+            className="sidebar-footer-email truncate"
+            title={adminUser?.email || 'admin@virtanis.dz'}
+          >
+            {adminUser?.email || 'admin@virtanis.dz'}
+          </div>
         </div>
       </aside>
 
