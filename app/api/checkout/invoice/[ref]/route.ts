@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { generateInvoicePdf } from '@/lib/pdf/invoice-generator';
 import { checkRateLimit } from '@/lib/security/rate-limiter';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(

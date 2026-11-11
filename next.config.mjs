@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ['pdfkit'],
+  outputFileTracingIncludes: {
+    '/api/checkout/invoice/:path*': ['./node_modules/pdfkit/**/*', './public/fonts/**/*'],
+    '/**/invoice/**': ['./node_modules/pdfkit/**/*', './public/fonts/**/*'],
+    '/**/api/checkout/**': ['./node_modules/pdfkit/**/*', './public/fonts/**/*'],
+  },
   images: {
     unoptimized: true,
   },
