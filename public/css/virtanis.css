@@ -7039,3 +7039,592 @@ a.contact-direct-value:hover {
     width: 100% !important;
   }
 }
+
+/* ==========================================================================
+   PAGE TÉLÉCHARGEMENT OFFICIEL VCHEQUE — LUXURY BANKING
+   ========================================================================== */
+
+.download-page-bg {
+  background-color: var(--ivory, #F7F4EC);
+  min-height: 80vh;
+  padding: clamp(2rem, 5vw, 3.5rem) 0 clamp(3rem, 6vw, 5rem);
+}
+
+.download-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* 1. CARTE MAÎTRESSE */
+.download-main-card {
+  background: var(--white, #FFFFFF);
+  border: 1px solid var(--border, #E5E0D5);
+  border-top: 4px solid var(--gold-500, #B99A5A);
+  border-radius: var(--radius-lg, 16px);
+  padding: clamp(2rem, 4vw, 3.2rem);
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(16, 44, 37, 0.06);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Halo et icône animée */
+.download-icon-wrapper {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--gold-500, #B99A5A);
+  animation: pulse-ring 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.download-icon-center {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #102C25 0%, #16382E 100%);
+  color: var(--gold-500, #B99A5A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(16, 44, 37, 0.2);
+  z-index: 1;
+}
+
+.download-main-title {
+  font-family: var(--font-serif, "DM Serif Display", serif);
+  font-weight: 400;
+  font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+  color: var(--green-900, #102C25);
+  margin: 0 0 1.25rem;
+  line-height: 1.2;
+}
+
+/* Boîte de statut automatique */
+.download-status-box {
+  background-color: var(--ivory, #F7F4EC);
+  border: 1px solid var(--border-soft, #EDE8DF);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.25rem 1.5rem;
+  margin: 0 auto 1.75rem;
+  max-width: 580px;
+}
+
+.download-status-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--green-900, #102C25);
+  margin-bottom: 0.75rem;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #2E7D32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+  animation: blink-dot 1.4s ease-in-out infinite;
+}
+
+@keyframes blink-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.download-progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: #E5DFD3;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.download-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #16382E 0%, #B99A5A 100%);
+  border-radius: 999px;
+  transition: width 0.1s linear;
+}
+
+/* Bouton d'action manuel */
+.btn-download-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background-color: var(--green-900, #102C25);
+  color: #FFFFFF !important;
+  font-family: var(--font-sans);
+  font-size: 0.925rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 1rem 1.8rem;
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid rgba(185, 154, 90, 0.4);
+  box-shadow: 0 4px 16px rgba(16, 44, 37, 0.18);
+  transition: all 0.22s ease;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.btn-download-cta:hover {
+  background-color: var(--green-800, #16382E);
+  border-color: var(--gold-500, #B99A5A);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 44, 37, 0.26);
+  color: #FFFFFF !important;
+}
+
+.download-cta-subtext {
+  font-size: 0.775rem;
+  color: var(--text-muted, #5F6C64);
+  margin-top: 0.6rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Fiche technique du binaire */
+.download-file-specs {
+  background-color: #FAF7F0;
+  border: 1px solid var(--border, #E5E0D5);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.download-specs-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-soft, #EDE8DF);
+}
+
+.download-specs-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border, #E5E0D5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-900, #102C25);
+}
+
+.download-specs-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--green-900, #102C25);
+  margin: 0;
+}
+
+.download-specs-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted, #5F6C64);
+  margin: 0;
+}
+
+.download-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.specs-item-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7A8B84;
+  margin-bottom: 0.25rem;
+}
+
+.specs-item-value {
+  font-size: 0.875rem;
+  color: var(--green-900, #102C25);
+  font-weight: 600;
+}
+
+.specs-filename {
+  font-family: var(--font-sans), monospace;
+  color: #102C25;
+  font-weight: 600;
+}
+
+.specs-badge-pill {
+  display: inline-block;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  background-color: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  color: #2E7D32;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-sans), monospace;
+}
+
+.download-sha-row {
+  background: #FFFFFF;
+  border: 1px solid var(--border-soft, #EDE8DF);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.85rem 1rem;
+}
+
+.sha-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7A8B84;
+  margin-bottom: 0.35rem;
+}
+
+.sha-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sha-code {
+  font-family: "Space Grotesk", monospace;
+  font-size: 0.75rem;
+  color: var(--green-900, #102C25);
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-copy-sha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  background-color: #FAF7F0;
+  border: 1px solid var(--border, #E5E0D5);
+  color: var(--green-900, #102C25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-copy-sha:hover {
+  background-color: var(--gold-500, #B99A5A);
+  border-color: var(--gold-500, #B99A5A);
+  color: #FFFFFF;
+}
+
+/* 2. CARTE GUIDE 3 ÉTAPES */
+.download-steps-card {
+  background: var(--white, #FFFFFF);
+  border: 1px solid var(--border, #E5E0D5);
+  border-radius: var(--radius-lg, 16px);
+  padding: clamp(1.75rem, 3.5vw, 2.75rem);
+  box-shadow: 0 4px 18px rgba(16, 44, 37, 0.05);
+  margin-bottom: 2rem;
+}
+
+.download-steps-title {
+  font-family: var(--font-serif, "DM Serif Display", serif);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  color: var(--green-900, #102C25);
+  margin: 0 0 0.5rem;
+}
+
+.download-steps-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #5F6C64);
+  margin: 0 0 1.75rem;
+  line-height: 1.5;
+}
+
+.download-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.step-card {
+  background-color: #FAF7F0;
+  border: 1px solid var(--border-soft, #EDE8DF);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.35rem 1.2rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--green-900, #102C25);
+  color: var(--gold-500, #B99A5A);
+  font-family: var(--font-serif, "DM Serif Display", serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+}
+
+.step-card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--green-900, #102C25);
+  margin: 0 0 0.4rem;
+}
+
+.step-card-text {
+  font-size: 0.775rem;
+  color: var(--text-muted, #5F6C64);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Encart SmartScreen */
+.smartscreen-tip {
+  background: rgba(185, 154, 90, 0.12);
+  border: 1px solid rgba(185, 154, 90, 0.35);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.1rem 1.35rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.smartscreen-tip-icon {
+  color: var(--gold-500, #B99A5A);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.smartscreen-tip-text {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #554425;
+  margin: 0;
+}
+
+.smartscreen-tip-text strong {
+  color: var(--green-900, #102C25);
+}
+
+/* 3. GRILLE SUPPORT & CONVERSION INFÉRIEURE */
+.download-support-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.support-card {
+  background: var(--white, #FFFFFF);
+  border: 1px solid var(--border, #E5E0D5);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.75rem;
+  box-shadow: 0 2px 12px rgba(16, 44, 37, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.support-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.support-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #FAF7F0;
+  border: 1px solid var(--border, #E5E0D5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-500, #B99A5A);
+  flex-shrink: 0;
+}
+
+.support-card-icon--emerald {
+  color: #2E7D32;
+  background-color: #E8F5E9;
+  border-color: #C8E6C9;
+}
+
+.support-card-title {
+  font-family: var(--font-serif, "DM Serif Display", serif);
+  font-weight: 400;
+  font-size: 1.2rem;
+  color: var(--green-900, #102C25);
+  margin: 0;
+}
+
+.support-card-text {
+  font-size: 0.825rem;
+  color: var(--text-muted, #5F6C64);
+  line-height: 1.6;
+  margin: 0 0 1.35rem;
+}
+
+.support-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--green-900, #102C25);
+  color: #FFFFFF !important;
+  font-size: 0.825rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.support-btn-primary:hover {
+  background-color: var(--green-800, #16382E);
+  transform: translateY(-1px);
+}
+
+.support-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: var(--green-900, #102C25) !important;
+  font-size: 0.825rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius-pill, 999px);
+  border: 1.5px solid var(--green-900, #102C25);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.support-btn-outline:hover {
+  background-color: var(--green-900, #102C25);
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+/* 4. VUE FALLBACK (INSTALLATEUR INDISPONIBLE) */
+.download-unavailable-card {
+  background: var(--white, #FFFFFF);
+  border: 1px solid var(--border, #E5E0D5);
+  border-top: 4px solid var(--gold-500, #B99A5A);
+  border-radius: var(--radius-lg, 16px);
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(16, 44, 37, 0.06);
+}
+
+.unavailable-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #FAF7F0;
+  border: 1px solid var(--border, #E5E0D5);
+  color: var(--gold-500, #B99A5A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.unavailable-title {
+  font-family: var(--font-serif, "DM Serif Display", serif);
+  font-weight: 400;
+  font-size: 1.85rem;
+  color: var(--green-900, #102C25);
+  margin: 0 0 1rem;
+}
+
+.unavailable-text {
+  font-size: 0.875rem;
+  color: var(--text-muted, #5F6C64);
+  line-height: 1.65;
+  margin: 0 0 2rem;
+}
+
+/* RESPONSIVE (< 640px) */
+@media (max-width: 640px) {
+  .download-specs-grid {
+    grid-template-columns: 1fr;
+  }
+  .download-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .btn-download-cta {
+    width: 100%;
+    padding: 1.1rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  .sha-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn-copy-sha {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
