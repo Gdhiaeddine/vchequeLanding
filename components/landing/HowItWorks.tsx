@@ -31,10 +31,10 @@ export default function HowItWorks() {
         <div className="section-head">
           <p className="eyebrow">Mode d&apos;emploi</p>
           <h2 id="how-heading" className="section-title">
-            Comment remplir un chèque avec VCheque ?
+            Comment remplir un chèque et imprimer sur le chèque avec VCheque ?
           </h2>
           <p className="section-lede">
-            Quatre étapes, de la saisie du montant à l&apos;impression calibrée.
+            Quatre étapes rapides, de la saisie automatique du montant à l&apos;impression directe sur votre chèque bancaire.
           </p>
         </div>
 

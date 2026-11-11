@@ -13,22 +13,16 @@ export default function Hero() {
             ================================================================ */}
         <div className="hero-copy">
           {/* Sur-titre (Eyebrow) avec trait horizontal doré de 34px généré en CSS */}
-          <p className="eyebrow">Logiciel professionnel de gestion de chèques</p>
+          <p className="eyebrow">Logiciel d&apos;impression et de remplissage de chèques</p>
 
           {/* Titre principal H1 avec accent doré/italique */}
           <h1 className="hero-title">
-            Remplissez et imprimez vos{' '}
-            <span className="accent italic">chèques algériens</span> en toute
-            simplicité
+            Comment <span className="accent italic">remplir un chèque</span> et imprimer sur le chèque sans erreur
           </h1>
 
           {/* Texte explicatif (Lede) */}
           <p className="hero-lede">
-            VCheque est le logiciel Windows conçu pour les PME, commerçants et
-            comptables en Algérie afin de remplir les chèques en quelques secondes,
-            convertir instantanément les montants en lettres françaises conformes
-            et calibrer au millimètre près l&apos;impression selon les gabarits de
-            toutes les banques algériennes (BNA, CPA, BEA, BADR, BDL, Al Baraka).
+            VCheque est le logiciel Windows de référence pour <strong>remplir vos chèques</strong> en quelques secondes et <strong>imprimer directement sur le chèque bancaire</strong> avec votre imprimante de bureau ordinaire. Conversion automatique des montants en lettres françaises et alignement millimétrique certifié pour toutes les banques algériennes (BNA, CPA, BEA, BADR, BDL, Al Baraka et CCP).
           </p>
 
           {/* Groupe de boutons CTA */}

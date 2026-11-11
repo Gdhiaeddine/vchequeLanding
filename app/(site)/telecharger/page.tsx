@@ -9,13 +9,16 @@ export const metadata: Metadata = {
   title: 'Télécharger VCheque pour Windows — Distribution Officielle en Algérie',
   description:
     'Téléchargez l’installateur officiel certifié du logiciel d’impression de chèques bancaires VCheque pour Windows 11 / 10 (64-bit). Déploiement rapide et sécurisé édité par Virtanis en Algérie.',
-  keywords: [
-    'télécharger VCheque',
-    'installer VCheque Windows',
-    'logiciel chèque algérie exe',
-    'téléchargement VCheque setup',
-    'Virtanis VCheque download',
-  ],
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
   openGraph: {
     title: 'Télécharger VCheque pour Windows — Logiciel d’Impression de Chèques en Algérie',
     description:

@@ -9,7 +9,15 @@ export default function Faq() {
   const faqItems = [
     {
       q: 'Qu\'est-ce que VCheque ?',
-      a: 'VCheque est une application Windows conçue pour simplifier la préparation des chèques : saisie du montant en dinars algériens, conversion du montant en lettres françaises, renseignement du bénéficiaire, du lieu et de la date, choix d\'un modèle de mise en page, calibrage en millimètres et impression.',
+      a: 'VCheque est un logiciel Windows professionnel conçu pour remplir chèque et imprimer sur le chèque bancaire ou postal en toute conformité : conversion automatique des montants en lettres françaises, renseignement du bénéficiaire, date, lieu, choix du gabarit bancaire et impression millimétrique sur imprimante ordinaire.',
+    },
+    {
+      q: 'Comment imprimer sur le chèque avec une imprimante ordinaire (jet d\'encre ou laser) ?',
+      a: 'Il vous suffit d\'insérer votre chèque dans le bac d\'alimentation manuel ou bac papier de votre imprimante (Epson, HP, Canon, Brother, etc.). VCheque propose un gabarit d\'alignement millimétrique (axes X et Y) pour que les écritures tombent exactement dans les cases de votre banque sans aucun décalage.',
+    },
+    {
+      q: 'Pourquoi utiliser un logiciel pour remplir et imprimer un chèque plutôt qu\'à la main ?',
+      a: 'L\'impression sur chèque élimine définitivement les risques de fautes d\'orthographe sur les montants en lettres, prévient les ratures qui entraînent le rejet du chèque par la banque, offre une écriture dactylographiée infalsifiable et fait gagner un temps précieux aux trésoriers et services comptables.',
     },
     {
       q: 'VCheque convertit-il les montants en lettres françaises ?',
