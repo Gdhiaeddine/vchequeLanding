@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 import BlogCatalog, { BlogPostItem } from '@/components/blog/BlogCatalog';
+import type { BlogPost } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default async function BlogPage() {
     orderBy: { published_at: 'desc' },
   });
 
-  const posts: BlogPostItem[] = postsRaw.map((p) => ({
+  const posts: BlogPostItem[] = postsRaw.map((p: BlogPost | any) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
@@ -33,9 +34,9 @@ export default async function BlogPage() {
     category: p.category,
     reading_time: p.reading_time,
     views_count: p.views_count,
-    published_at: p.published_at ? p.published_at.toISOString() : null,
-    created_at: p.created_at ? p.created_at.toISOString() : null,
-    updated_at: p.updated_at ? p.updated_at.toISOString() : null,
+    published_at: p.published_at ? new Date(p.published_at).toISOString() : null,
+    created_at: p.created_at ? new Date(p.created_at).toISOString() : null,
+    updated_at: p.updated_at ? new Date(p.updated_at).toISOString() : null,
   }));
 
   return <BlogCatalog initialPosts={posts} />;
