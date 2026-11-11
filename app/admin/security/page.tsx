@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ShieldCheck, RefreshCw, Key, CheckCircle2, AlertCircle, Copy, Lock } from 'lucide-react';
+import { ShieldCheck, RefreshCw, Key, CheckCircle2, AlertCircle, Copy, Lock, Mail, UserCheck } from 'lucide-react';
 
 export default function AdminSecurityPage() {
   const [data, setData] = useState<any>(null);
@@ -12,6 +12,15 @@ export default function AdminSecurityPage() {
   const [setupState, setSetupState] = useState<{ secret: string; qrCode: string } | null>(null);
   const [confirmCode, setConfirmCode] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Formulaire de modification d'identifiants
+  const [credForm, setCredForm] = useState({
+    newEmail: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [credLoading, setCredLoading] = useState(false);
 
   const fetchSecurityData = async () => {
     try {
@@ -30,6 +39,58 @@ export default function AdminSecurityPage() {
   useEffect(() => {
     fetchSecurityData();
   }, []);
+
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+
+    if (!credForm.currentPassword) {
+      setMessage({ type: 'error', text: 'Veuillez saisir votre mot de passe actuel pour valider les modifications.' });
+      return;
+    }
+
+    if (credForm.newPassword && credForm.newPassword !== credForm.confirmPassword) {
+      setMessage({ type: 'error', text: 'La confirmation du mot de passe ne correspond pas au nouveau mot de passe.' });
+      return;
+    }
+
+    if (credForm.newPassword && credForm.newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Le nouveau mot de passe doit comporter au moins 8 caractères.' });
+      return;
+    }
+
+    if (!credForm.newEmail && !credForm.newPassword) {
+      setMessage({ type: 'error', text: 'Veuillez renseigner un nouvel email ou un nouveau mot de passe.' });
+      return;
+    }
+
+    setCredLoading(true);
+    try {
+      const res = await fetch('/api/admin/security', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'change_credentials',
+          currentPassword: credForm.currentPassword,
+          newEmail: credForm.newEmail ? credForm.newEmail.trim() : undefined,
+          newPassword: credForm.newPassword ? credForm.newPassword.trim() : undefined,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Erreur lors de la mise à jour des identifiants.');
+      }
+
+      setMessage({ type: 'success', text: json.message || 'Identifiants modifiés avec succès.' });
+      setCredForm({ newEmail: '', currentPassword: '', newPassword: '', confirmPassword: '' });
+      await fetchSecurityData();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setCredLoading(false);
+    }
+  };
 
   const handleRegenerateCodes = async () => {
     if (!confirm('Régénérer vos codes de secours ? Les anciens codes seront invalidés.')) return;
@@ -275,6 +336,105 @@ export default function AdminSecurityPage() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Modification Email & Mot de Passe Card */}
+      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e2dcce] shadow-sm space-y-6">
+        <div className="flex items-center gap-4 pb-6 border-b border-[#f4f0e6]">
+          <div className="w-12 h-12 rounded-xl bg-[#122620] text-[#b99a5a] flex items-center justify-center shrink-0">
+            <Lock size={24} />
+          </div>
+          <div>
+            <h3 className="text-lg font-serif text-[#102C25] font-normal tracking-tight">
+              Identifiants de Connexion Administrateur
+            </h3>
+            <p className="text-xs text-[#6b7c74] mt-0.5">
+              Modifiez votre adresse email de connexion ou votre mot de passe maître
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleUpdateCredentials} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
+                Adresse email actuelle
+              </label>
+              <input
+                type="text"
+                disabled
+                value={data?.email || ''}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#f4f0e6]/50 text-xs text-[#6b7c74] font-medium cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
+                Nouvelle adresse email <span className="text-[#86928b] font-normal lowercase">(optionnel)</span>
+              </label>
+              <input
+                type="email"
+                placeholder="Ex: nouveau-mail@virtanis.dz"
+                value={credForm.newEmail}
+                onChange={(e) => setCredForm((prev) => ({ ...prev, newEmail: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-[#f4f0e6]">
+            <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
+              Mot de passe actuel <span className="text-red-700">* (requis pour confirmer)</span>
+            </label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••••••"
+              value={credForm.currentPassword}
+              onChange={(e) => setCredForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
+              className="w-full max-w-md px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
+                Nouveau mot de passe <span className="text-[#86928b] font-normal lowercase">(optionnel, min. 8 car.)</span>
+              </label>
+              <input
+                type="password"
+                placeholder="Nouveau mot de passe fort"
+                value={credForm.newPassword}
+                onChange={(e) => setCredForm((prev) => ({ ...prev, newPassword: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[#35433d] mb-1.5">
+                Confirmer le nouveau mot de passe
+              </label>
+              <input
+                type="password"
+                placeholder="Répéter le nouveau mot de passe"
+                value={credForm.confirmPassword}
+                onChange={(e) => setCredForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-[#e2dcce] bg-[#fdfbf7] text-xs text-[#122620] focus:border-[#b99a5a] focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 flex justify-end">
+            <button
+              type="submit"
+              disabled={credLoading}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#122620] text-white hover:bg-[#1a382f] text-xs font-bold shadow-sm transition-all disabled:opacity-50"
+            >
+              <Lock size={14} className={credLoading ? 'animate-spin' : ''} />
+              <span>{credLoading ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
