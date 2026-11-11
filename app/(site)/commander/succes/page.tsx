@@ -416,13 +416,13 @@ export default async function CheckoutSuccessPage({
 
             {/* Groupe de boutons d'action */}
             <div className="success-actions-group">
-              <a
-                href="/telecharger/fichier"
+              <Link
+                href="/telecharger"
                 className="btn-download-primary"
               >
                 <Download size={18} aria-hidden="true" />
                 <span>Télécharger pour Windows</span>
-              </a>
+              </Link>
 
               <a
                 href={`/api/checkout/invoice/${encodeURIComponent(order.reference)}`}

@@ -279,7 +279,7 @@ export class MailerService {
                     <table role="presentation" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td>
-                          <a href="${appUrl}/telecharger/fichier" target="_blank" style="display: inline-block; padding: 11px 22px; background-color: #102C25; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; border-radius: 9999px; border-left: 3px solid #B99A5A; box-shadow: 0 4px 12px rgba(16, 44, 37, 0.15);">
+                          <a href="${appUrl}/telecharger" target="_blank" style="display: inline-block; padding: 11px 22px; background-color: #102C25; color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; border-radius: 9999px; border-left: 3px solid #B99A5A; box-shadow: 0 4px 12px rgba(16, 44, 37, 0.15);">
                             Télécharger l&apos;installateur (.exe)
                           </a>
                         </td>
@@ -392,7 +392,7 @@ ${licenseKey}
 Réf. Commande : ${orderRef} • Licence Perpétuelle (${maxActivations} PC)
 
 GUIDE DE MISE EN ROUTE :
-1. Téléchargez VCheque : ${appUrl}/telecharger/fichier
+1. Téléchargez VCheque : ${appUrl}/telecharger
 2. Installez le logiciel sur le PC dédié à l'impression de chèques.
 3. Activez votre licence à l'ouverture (signature Ed25519 hors-ligne).
 
