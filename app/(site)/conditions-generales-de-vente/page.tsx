@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'SlickPay CIB Edahabia',
   ],
   alternates: {
-    canonical: 'https://vcheque.com/conditions-generales-de-vente',
+    canonical: 'https://vcheque.virtanis.net/conditions-generales-de-vente',
   },
 };
 

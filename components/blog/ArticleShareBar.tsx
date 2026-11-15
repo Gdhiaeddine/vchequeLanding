@@ -15,7 +15,7 @@ export default function ArticleShareBar({ title, slug }: ArticleShareBarProps) {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/blog/${slug}`;
     }
-    return `https://vcheque.com/blog/${slug}`;
+    return `https://vcheque.virtanis.net/blog/${slug}`;
   };
 
   const handleCopy = async () => {

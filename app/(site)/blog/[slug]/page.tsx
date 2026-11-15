@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const siteUrl = 'https://vcheque.com';
+  const siteUrl = 'https://vcheque.virtanis.net';
   const postUrl = `${siteUrl}/blog/${post.slug}`;
   const imageUrl = post.cover_image_path
     ? `${siteUrl}/api/blog/cover/${post.id}`
@@ -199,22 +199,22 @@ export default async function BlogPostPage({ params }: PageProps) {
     author: {
       '@type': 'Organization',
       name: 'Équipe Virtanis',
-      url: 'https://vcheque.com',
+      url: 'https://vcheque.virtanis.net',
     },
     publisher: {
       '@type': 'Organization',
       name: 'VCheque Algérie',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://vcheque.com/icon.svg',
+        url: 'https://vcheque.virtanis.net/icon.svg',
       },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://vcheque.com/blog/${post.slug}`,
+      '@id': `https://vcheque.virtanis.net/blog/${post.slug}`,
     },
     image: post.cover_image_path
-      ? `https://vcheque.com/api/blog/cover/${post.id}`
+      ? `https://vcheque.virtanis.net/api/blog/cover/${post.id}`
       : undefined,
   };
 

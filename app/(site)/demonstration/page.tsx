@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: 'Démonstration VCheque : Découvrez le Logiciel d’Impression de Chèques en Action',
     description:
       'Tutoriel vidéo complet : remplissage, conversion instantanée et impression millimétrique sur chèques bancaires algériens.',
-    url: 'https://vcheque.com/demonstration',
+    url: 'https://vcheque.virtanis.net/demonstration',
     siteName: 'VCheque par Virtanis',
     locale: 'fr_DZ',
     type: 'website',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
       'Découvrez comment sécuriser et imprimer vos chèques bancaires algériens avec VCheque.',
   },
   alternates: {
-    canonical: 'https://vcheque.com/demonstration',
+    canonical: 'https://vcheque.virtanis.net/demonstration',
   },
 };
 
@@ -75,12 +75,12 @@ export default async function DemonstrationPage() {
           'Démonstration pratique du logiciel d’impression et d’édition de chèques bancaires VCheque pour l’Algérie.',
         thumbnailUrl: activeVideo.thumbnail_path
           ? [activeVideo.thumbnail_path]
-          : ['https://vcheque.com/images/demo-placeholder.jpg'],
+          : ['https://vcheque.virtanis.net/images/demo-placeholder.jpg'],
         uploadDate: activeVideo.created_at
           ? new Date(activeVideo.created_at).toISOString()
           : new Date().toISOString(),
-        contentUrl: `https://vcheque.com/api/demonstration/video/${activeVideo.id}`,
-        embedUrl: `https://vcheque.com/demonstration`,
+        contentUrl: `https://vcheque.virtanis.net/api/demonstration/video/${activeVideo.id}`,
+        embedUrl: `https://vcheque.virtanis.net/demonstration`,
         interactionStatistic: {
           '@type': 'InteractionCounter',
           interactionType: { '@type': 'WatchAction' },
@@ -93,7 +93,7 @@ export default async function DemonstrationPage() {
         name: 'Démonstration Officielle VCheque',
         description:
           'Présentation interactive et démonstration des fonctionnalités du logiciel d’impression de chèques VCheque.',
-        url: 'https://vcheque.com/demonstration',
+        url: 'https://vcheque.virtanis.net/demonstration',
       };
 
   return (

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Contacter Virtanis & l’Équipe VCheque — Support Officiel Algérie',
     description:
       'Une question commerciale, un besoin de déploiement multi-postes ou une assistance technique ? Nos spécialistes vous répondent sous 24h ouvrées.',
-    url: 'https://vcheque.com/contact',
+    url: 'https://vcheque.virtanis.net/contact',
     siteName: 'VCheque par Virtanis',
     locale: 'fr_DZ',
     type: 'website',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
       'Assistance technique et demandes de devis multi-postes en Algérie pour le logiciel d’impression de chèques VCheque.',
   },
   alternates: {
-    canonical: 'https://vcheque.com/contact',
+    canonical: 'https://vcheque.virtanis.net/contact',
   },
 };
 
@@ -41,12 +41,12 @@ export default function ContactPage() {
     name: 'Contact Virtanis & VCheque Algérie',
     description:
       'Assistance technique et relations professionnelles pour le logiciel d’impression de chèques et bordereaux VCheque.',
-    url: 'https://vcheque.com/contact',
+    url: 'https://vcheque.virtanis.net/contact',
     mainEntity: {
       '@type': 'Organization',
       name: 'Virtanis Technologies',
       url: 'https://virtanis.net',
-      logo: 'https://vcheque.com/icon.svg',
+      logo: 'https://vcheque.virtanis.net/icon.svg',
       contactPoint: [
         {
           '@type': 'ContactPoint',

@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'chèque bancaire CIB Edahabia',
   ],
   alternates: {
-    canonical: 'https://vcheque.com/mentions-legales',
+    canonical: 'https://vcheque.virtanis.net/mentions-legales',
   },
 };
 
@@ -190,7 +190,7 @@ export default function MentionsLegalesPage() {
               </header>
               <div className="legal-section-body">
                 <p>
-                  Le site internet accessible à l&apos;adresse <strong>https://vcheque.com</strong> (ci-après « le Site »)
+                  Le site internet accessible à l&apos;adresse <strong>https://vcheque.virtanis.net</strong> (ci-après « le Site »)
                   ainsi que le logiciel applicatif bureautique pour Windows <strong>VCheque</strong> sont conçus, développés,
                   édités et exploités par la structure professionnelle <strong>Virtanis</strong>.
                 </p>

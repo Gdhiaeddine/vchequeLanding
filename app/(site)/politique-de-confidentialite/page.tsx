@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'zero-knowledge logiciel chèque',
   ],
   alternates: {
-    canonical: 'https://vcheque.com/politique-de-confidentialite',
+    canonical: 'https://vcheque.virtanis.net/politique-de-confidentialite',
   },
 };
 
