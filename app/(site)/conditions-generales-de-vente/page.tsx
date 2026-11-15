@@ -157,7 +157,7 @@ export default function CgvPage() {
                 </li>
                 <li>
                   <a href="#cgv-12" className="legal-toc-link">
-                    12. Droit &amp; Juridiction Alger
+                    12. Droit &amp; Juridiction Sétif
                   </a>
                 </li>
               </ol>
@@ -212,7 +212,7 @@ export default function CgvPage() {
                   </div>
                   <div className="legal-info-row">
                     <span className="legal-info-label">Siège d&apos;exploitation :</span>
-                    <span className="legal-info-val">Alger, République Algérienne Démocratique et Populaire</span>
+                    <span className="legal-info-val">Sétif, République Algérienne Démocratique et Populaire</span>
                   </div>
                   <div className="legal-info-row">
                     <span className="legal-info-label">Contact officiel &amp; Support :</span>
@@ -602,7 +602,7 @@ export default function CgvPage() {
 
                 <p>
                   À défaut d&apos;accord amiable, attribution expresse et exclusive de compétence est accordée aux{' '}
-                  <strong className="text-[#102C25]">Tribunaux compétents relevant du ressort de la Cour d&apos;Alger (Algérie)</strong>,
+                  <strong className="text-[#102C25]">Tribunaux compétents relevant du ressort de la Cour de Sétif (Algérie)</strong>,
                   seuls compétents nonobstant pluralité de défendeurs ou appel en garantie.
                 </p>
 

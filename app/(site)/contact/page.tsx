@@ -80,7 +80,7 @@ export default function ContactPage() {
       ],
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Alger',
+        addressLocality: 'Sétif',
         addressCountry: 'DZ',
       },
     },

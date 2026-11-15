@@ -74,8 +74,8 @@ function CheckoutContent() {
     entreprise: '',
     adresse: '',
     code_postal: '',
-    ville: 'Alger',
-    wilaya: '16 - Alger',
+    ville: 'Sétif',
+    wilaya: '19 - Sétif',
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [honeypot, setHoneypot] = useState('');
@@ -524,7 +524,7 @@ function CheckoutContent() {
                         id="ville"
                         name="ville"
                         autoComplete="address-level2"
-                        placeholder="Alger"
+                        placeholder="Sétif"
                         value={formData.ville}
                         onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
                       />

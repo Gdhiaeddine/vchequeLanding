@@ -78,7 +78,7 @@ export default function Features() {
               <div className="fx-mini-cols" aria-hidden="true">
                 <div className="fx-mini-field">
                   <span className="fx-mini-label">Lieu</span>
-                  <span className="fx-mini-input">Alger</span>
+                  <span className="fx-mini-input">Sétif</span>
                 </div>
                 <div className="fx-mini-field">
                   <span className="fx-mini-label">Date</span>
@@ -115,7 +115,7 @@ export default function Features() {
                 </p>
                 <p className="cheque-ordertext">À l&apos;ordre de : Entreprise Exemple SARL</p>
                 <div className="cheque-place-row">
-                  <span>Alger</span>
+                  <span>Sétif</span>
                   <span>Le 19/10/2026</span>
                 </div>
               </div>

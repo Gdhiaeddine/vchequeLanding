@@ -279,7 +279,7 @@ export default function Hero() {
 
                   <div className="nc-field">
                     <span className="nc-fieldlabel">Lieu</span>
-                    <span className="nc-input">Alger</span>
+                    <span className="nc-input">Sétif</span>
                   </div>
 
                   <div className="nc-field">
@@ -335,7 +335,7 @@ export default function Hero() {
                   </p>
 
                   <div className="cheque-place-row">
-                    <span>Alger</span>
+                    <span>Sétif</span>
                     <span>Le 19/10/2026</span>
                   </div>
                 </div>

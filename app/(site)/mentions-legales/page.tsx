@@ -101,7 +101,7 @@ export default function MentionsLegalesPage() {
 
             <span className="legal-meta-dot" aria-hidden="true">•</span>
 
-            <span>Juridiction : Alger, Algérie</span>
+            <span>Juridiction : Sétif, Algérie</span>
           </div>
         </div>
       </header>
@@ -206,7 +206,7 @@ export default function MentionsLegalesPage() {
                   </div>
                   <div className="legal-info-row">
                     <span className="legal-info-label">Implantation :</span>
-                    <span className="legal-info-val">Alger, République Algérienne Démocratique et Populaire</span>
+                    <span className="legal-info-val">Sétif, République Algérienne Démocratique et Populaire</span>
                   </div>
                   <div className="legal-info-row">
                     <span className="legal-info-label">Portail institutionnel :</span>
@@ -505,7 +505,7 @@ export default function MentionsLegalesPage() {
                 <p>
                   À défaut de règlement amiable, compétence exclusive et expresse est attribuée aux{' '}
                   <strong className="text-[#102C25]">juridictions compétentes territorialement et matériellement relevant de la
-                  Cour d&apos;Alger (Algérie)</strong>, nonobstant pluralité de défendeurs ou appel en garantie.
+                  Cour de Sétif (Algérie)</strong>, nonobstant pluralité de défendeurs ou appel en garantie.
                 </p>
               </div>
             </section>

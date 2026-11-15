@@ -137,7 +137,7 @@ export class SlickPayService {
         ? order.telephone.trim().replace(/[^0-9+]/g, '') || '0550000000'
         : '0550000000';
     const address =
-      order.adresse && order.adresse.trim() !== '' ? order.adresse.trim() : 'Alger, Algérie';
+      order.adresse && order.adresse.trim() !== '' ? order.adresse.trim() : 'Sétif, Algérie';
 
     // 2. Résoudre le compte de réception officiel (Account UUID)
     const accountUuid = await this.resolveAccountUuid();
@@ -295,7 +295,7 @@ export class SlickPayService {
         lastname: 'Diagnostic',
         phone: '0550000000',
         email: 'diagnostic@vcheque.virtanis.net',
-        address: 'Alger, Algérie',
+        address: 'Sétif, Algérie',
         note: 'Test Diagnostic VCheque SATIM',
         items: [{ name: 'Test SATIM VCheque', price: 4900, quantity: 1 }],
       };

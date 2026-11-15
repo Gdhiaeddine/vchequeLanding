@@ -578,7 +578,7 @@ export default function ContactView() {
                       <div className="contact-direct-label">Horaires d&apos;assistance</div>
                       <div className="contact-direct-value">Dimanche au Jeudi</div>
                       <div className="text-[12px] text-[#65756E] mt-0.5">
-                        08h30 – 17h00 (Heure d&apos;Alger)
+                        08h30 – 17h00 (Heure d&apos;Algérie)
                       </div>
                     </div>
                   </div>
@@ -590,7 +590,7 @@ export default function ContactView() {
                     </div>
                     <div>
                       <div className="contact-direct-label">Implantation</div>
-                      <div className="contact-direct-value">Alger, République Algérienne</div>
+                      <div className="contact-direct-value">Sétif, République Algérienne</div>
                     </div>
                   </div>
                 </div>
